@@ -12,27 +12,33 @@ This project provides a provider-agnostic email service with support for:
 
 ## Architecture
 
+The interface (`IEmailService`) is defined in the **Application** layer to maintain Clean Architecture principles. This project provides the implementation.
+
 ```
-AiGroupChat.Email/
-├── Configuration/
-│   └── EmailSettings.cs        # Configuration model
+Application Layer
 ├── Interfaces/
-│   ├── IEmailProvider.cs       # Provider abstraction
-│   └── IEmailService.cs        # High-level email service
+│   └── IEmailService.cs       # Interface (abstraction)
 ├── Models/
-│   ├── EmailMessage.cs         # Email message model
-│   └── EmailResult.cs          # Send result model
+│   └── EmailResult.cs         # Result model
+
+Email Project (this project)
+├── Configuration/
+│   └── EmailSettings.cs       # Configuration model
+├── Interfaces/
+│   └── IEmailProvider.cs      # Internal provider abstraction
+├── Models/
+│   └── EmailMessage.cs        # Internal email message model
 ├── Providers/
-│   └── ResendEmailProvider.cs  # Resend implementation
+│   └── ResendEmailProvider.cs # Resend implementation
 ├── Services/
-│   └── EmailService.cs         # Email service implementation
+│   └── EmailService.cs        # IEmailService implementation
 ├── Templates/
 │   ├── Html/
-│   │   ├── ConfirmEmail.html   # Confirmation email template
-│   │   └── PasswordReset.html  # Password reset template
+│   │   ├── ConfirmEmail.html  # Confirmation email template
+│   │   └── PasswordReset.html # Password reset template
 │   ├── IEmailTemplateService.cs
 │   └── EmailTemplateService.cs
-└── DependencyInjection.cs      # DI registration
+└── DependencyInjection.cs     # DI registration
 ```
 
 ## Configuration
@@ -94,3 +100,11 @@ To switch from Resend to another provider (e.g., Mailgun):
 ```csharp
 services.AddScoped<IEmailProvider, MailgunEmailProvider>();
 ```
+
+## Design Decisions
+
+1. **Interface in Application layer** - `IEmailService` is defined in the Application layer so that business logic (like `AuthService`) depends on an abstraction, not a concrete implementation. This follows the Dependency Inversion Principle.
+
+2. **EmailResult in Application layer** - Since it's the return type of `IEmailService`, it must also be in the Application layer.
+
+3. **Internal IEmailProvider** - The provider abstraction (`IEmailProvider`) stays in this project since it's an internal implementation detail, not used by other layers.

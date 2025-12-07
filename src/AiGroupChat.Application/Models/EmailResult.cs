@@ -1,5 +1,4 @@
-namespace AiGroupChat.Email.Models;
-
+namespace AiGroupChat.Application.Models;
 public class EmailResult
 {
     public bool IsSuccess { get; set; }

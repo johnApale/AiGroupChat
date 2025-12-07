@@ -1,3 +1,4 @@
+using AiGroupChat.Application.Interfaces;
 using AiGroupChat.Email.Configuration;
 using AiGroupChat.Email.Interfaces;
 using AiGroupChat.Email.Providers;

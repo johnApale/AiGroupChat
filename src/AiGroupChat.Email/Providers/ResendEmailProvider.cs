@@ -1,3 +1,4 @@
+using AiGroupChat.Application.Models;
 using AiGroupChat.Email.Configuration;
 using AiGroupChat.Email.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -22,7 +23,7 @@ public class ResendEmailProvider : IEmailProvider
         _logger = logger;
     }
 
-    public async Task<Models.EmailResult> SendAsync(Models.EmailMessage message, CancellationToken cancellationToken = default)
+    public async Task<EmailResult> SendAsync(Models.EmailMessage message, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -41,12 +42,12 @@ public class ResendEmailProvider : IEmailProvider
             _logger.LogInformation("Email sent successfully to {Recipient}. EmailId: {EmailId}", 
                 message.To, emailId);
 
-            return Models.EmailResult.Success(emailId);
+            return EmailResult.Success(emailId);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to send email to {Recipient}", message.To);
-            return Models.EmailResult.Failure(ex.Message);
+            return EmailResult.Failure(ex.Message);
         }
     }
 }

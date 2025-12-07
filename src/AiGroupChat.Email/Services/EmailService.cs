@@ -1,4 +1,6 @@
 using System.Web;
+using AiGroupChat.Application.Interfaces;
+using AiGroupChat.Application.Models;
 using AiGroupChat.Email.Configuration;
 using AiGroupChat.Email.Interfaces;
 using AiGroupChat.Email.Models;

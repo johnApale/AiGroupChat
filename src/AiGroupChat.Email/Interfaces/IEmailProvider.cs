@@ -1,3 +1,4 @@
+using AiGroupChat.Application.Models;
 using AiGroupChat.Email.Models;
 
 namespace AiGroupChat.Email.Interfaces;

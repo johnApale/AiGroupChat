@@ -1,6 +1,6 @@
-using AiGroupChat.Email.Models;
+using AiGroupChat.Application.Models;
 
-namespace AiGroupChat.Email.Interfaces;
+namespace AiGroupChat.Application.Interfaces;
 
 /// <summary>
 /// High-level email service for sending application emails
