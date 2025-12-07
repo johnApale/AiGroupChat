@@ -6,26 +6,61 @@ The Infrastructure layer implements external concerns and data access. This laye
 
 - Database access via Entity Framework Core
 - Entity configurations and migrations
-- External service integrations (AI client, email, etc.)
+- ASP.NET Identity configuration
+- JWT token generation and validation
 - Repository implementations
 
 ## Dependencies
 
 - **AiGroupChat.Application** (and transitively Domain)
+- **AiGroupChat.Email** - Email service
 - **Npgsql.EntityFrameworkCore.PostgreSQL** - PostgreSQL database provider
 - **Microsoft.AspNetCore.Identity.EntityFrameworkCore** - Identity with EF Core
+- **Microsoft.AspNetCore.Authentication.JwtBearer** - JWT authentication
+- **System.IdentityModel.Tokens.Jwt** - JWT token handling
 - **Microsoft.EntityFrameworkCore.Tools** - Migration tooling
 
 ## Folder Structure
 
 ```
 AiGroupChat.Infrastructure/
+├── Configuration/
+│   └── JwtSettings.cs
 ├── Data/
 │   ├── Configurations/     # EF Core entity configurations
 │   └── ApplicationDbContext.cs
-├── DependencyInjection.cs  # Service registration
+├── Repositories/
+│   └── IdentityUserRepository.cs
+├── Services/
+│   └── TokenService.cs
+├── Migrations/
+├── DependencyInjection.cs
 └── README.md
 ```
+
+## Configuration
+
+### JwtSettings
+
+| Property                       | Description                                       |
+| ------------------------------ | ------------------------------------------------- |
+| `Secret`                       | Secret key for signing tokens (min 32 characters) |
+| `Issuer`                       | Token issuer (your app name)                      |
+| `Audience`                     | Token audience (your app name)                    |
+| `AccessTokenExpirationMinutes` | Access token lifetime (default: 15)               |
+| `RefreshTokenExpirationDays`   | Refresh token lifetime (default: 7)               |
+
+## Repositories
+
+| Repository               | Interface         | Purpose                            |
+| ------------------------ | ----------------- | ---------------------------------- |
+| `IdentityUserRepository` | `IUserRepository` | Wraps ASP.NET Identity UserManager |
+
+## Services
+
+| Service        | Interface       | Purpose                                     |
+| -------------- | --------------- | ------------------------------------------- |
+| `TokenService` | `ITokenService` | JWT access token and refresh token handling |
 
 ## Entity Configurations
 
@@ -64,6 +99,16 @@ using AiGroupChat.Infrastructure;
 builder.Services.AddInfrastructure(builder.Configuration);
 ```
 
+This registers:
+
+- Database context
+- ASP.NET Identity
+- JWT settings
+- Repositories (`IUserRepository`)
+- Services (`ITokenService`)
+- Application layer services
+- Email services
+
 ## Connection String
 
 Configure in `appsettings.json`:
@@ -72,6 +117,13 @@ Configure in `appsettings.json`:
 {
   "ConnectionStrings": {
     "DefaultConnection": "Host=localhost;Port=5434;Database=aigroupchat_dev;Username=aigroupchat;Password=devpassword123"
+  },
+  "Jwt": {
+    "Secret": "your-secret-key-at-least-32-characters",
+    "Issuer": "AiGroupChat",
+    "Audience": "AiGroupChat",
+    "AccessTokenExpirationMinutes": 15,
+    "RefreshTokenExpirationDays": 7
   }
 }
 ```
@@ -106,3 +158,7 @@ dotnet ef migrations remove \
 4. **Composite indexes** - Added on frequently queried combinations (e.g., `GroupId + AiVisible` for fetching AI context).
 
 5. **Cascade deletes** - Messages deleted when group is deleted; metadata deleted when message is deleted.
+
+6. **IdentityUserRepository** - Wraps UserManager to allow swapping Identity for another auth provider (e.g., Firebase, Cognito).
+
+7. **Web SDK for project** - Required for ASP.NET Identity extensions, with `OutputType=Library` to prevent entry point requirement.
