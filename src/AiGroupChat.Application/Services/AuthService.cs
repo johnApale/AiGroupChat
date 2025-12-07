@@ -1,5 +1,7 @@
 using AiGroupChat.Application.DTOs.Auth;
+using AiGroupChat.Application.Exceptions;
 using AiGroupChat.Application.Interfaces;
+using AiGroupChat.Application.Models;
 using AiGroupChat.Domain.Entities;
 
 namespace AiGroupChat.Application.Services;
@@ -35,7 +37,7 @@ public class AuthService : IAuthService
 
         if (!succeeded)
         {
-            throw new ApplicationException(string.Join(", ", errors));
+            throw new ValidationException(errors);
         }
 
         var token = await _userRepository.GenerateEmailConfirmationTokenAsync(user, cancellationToken);
@@ -50,21 +52,21 @@ public class AuthService : IAuthService
 
         if (user == null)
         {
-            throw new UnauthorizedAccessException("Invalid email or password.");
+            throw new AuthenticationException("Invalid email or password.");
         }
 
         var isEmailConfirmed = await _userRepository.IsEmailConfirmedAsync(user, cancellationToken);
 
         if (!isEmailConfirmed)
         {
-            throw new UnauthorizedAccessException("Please confirm your email before logging in.");
+            throw new AuthenticationException("Please confirm your email before logging in.");
         }
 
         var isPasswordValid = await _userRepository.CheckPasswordAsync(user, request.Password, cancellationToken);
 
         if (!isPasswordValid)
         {
-            throw new UnauthorizedAccessException("Invalid email or password.");
+            throw new AuthenticationException("Invalid email or password.");
         }
 
         return await GenerateAuthResponseAsync(user, cancellationToken);
@@ -76,14 +78,14 @@ public class AuthService : IAuthService
 
         if (user == null)
         {
-            throw new ApplicationException("Invalid confirmation request.");
+            throw new ValidationException("Invalid confirmation request.");
         }
 
         var succeeded = await _userRepository.ConfirmEmailAsync(user, request.Token, cancellationToken);
 
         if (!succeeded)
         {
-            throw new ApplicationException("Invalid or expired confirmation token.");
+            throw new ValidationException("Invalid or expired confirmation token.");
         }
 
         return await GenerateAuthResponseAsync(user, cancellationToken);
@@ -130,14 +132,14 @@ public class AuthService : IAuthService
 
         if (user == null)
         {
-            throw new ApplicationException("Invalid password reset request.");
+            throw new ValidationException("Invalid password reset request.");
         }
 
         var (succeeded, errors) = await _userRepository.ResetPasswordAsync(user, request.Token, request.NewPassword, cancellationToken);
 
         if (!succeeded)
         {
-            throw new ApplicationException(string.Join(", ", errors));
+            throw new ValidationException(errors);
         }
 
         // Revoke all refresh tokens after password reset
@@ -152,14 +154,14 @@ public class AuthService : IAuthService
 
         if (userId == null)
         {
-            throw new UnauthorizedAccessException("Invalid or expired refresh token.");
+            throw new AuthenticationException("Invalid or expired refresh token.");
         }
 
         var user = await _userRepository.FindByIdAsync(userId, cancellationToken);
 
         if (user == null)
         {
-            throw new UnauthorizedAccessException("User not found.");
+            throw new AuthenticationException("User not found.");
         }
 
         // Revoke old refresh token

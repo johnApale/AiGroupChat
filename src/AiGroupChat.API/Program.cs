@@ -1,4 +1,5 @@
 using System.Text;
+using AiGroupChat.API.Middleware;
 using AiGroupChat.Infrastructure;
 using AiGroupChat.Infrastructure.Configuration;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -36,6 +37,9 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
+
+// Exception handling middleware (must be first)
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
