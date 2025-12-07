@@ -71,15 +71,16 @@ DTOs (Data Transfer Objects) define the shape of data for API requests and respo
 
 Interfaces define contracts that are implemented in other layers.
 
-| Interface          | Implemented In | Purpose                           |
-| ------------------ | -------------- | --------------------------------- |
-| `IAuthService`     | Application    | Authentication business logic     |
-| `ITokenService`    | Infrastructure | JWT and refresh token handling    |
-| `IUserRepository`  | Infrastructure | User data access (wraps Identity) |
-| `IEmailService`    | Email          | Email sending                     |
-| `IUserService`     | Application    | User profile retrieval            |
-| `IGroupRepository` | Infrastructure | Group data access                 |
-| `IGroupService`    | Application    | Group CRUD and authorization      |
+| Interface             | Implemented In | Purpose                           |
+| --------------------- | -------------- | --------------------------------- |
+| `IAuthService`        | Application    | Authentication business logic     |
+| `ITokenService`       | Infrastructure | JWT and refresh token handling    |
+| `IUserRepository`     | Infrastructure | User data access (wraps Identity) |
+| `IEmailService`       | Email          | Email sending                     |
+| `IUserService`        | Application    | User profile retrieval            |
+| `IGroupRepository`    | Infrastructure | Group data access                 |
+| `IGroupService`       | Application    | Group CRUD and authorization      |
+| `IGroupMemberService` | Application    | Group member management           |
 
 ## Exceptions
 
@@ -94,11 +95,12 @@ Custom exceptions for consistent error handling.
 
 ## Services
 
-| Service        | Purpose                                                              |
-| -------------- | -------------------------------------------------------------------- |
-| `AuthService`  | Handles registration, login, password reset, token refresh           |
-| `UserService`  | Handles user lookup by ID and current user retrieval                 |
-| `GroupService` | Handles group creation, retrieval, update, delete with authorization |
+| Service              | Purpose                                                                  |
+| -------------------- | ------------------------------------------------------------------------ |
+| `AuthService`        | Handles registration, login, password reset, token refresh               |
+| `UserService`        | Handles user lookup by ID and current user retrieval                     |
+| `GroupService`       | Handles group creation, retrieval, update, delete with authorization     |
+| `GroupMemberService` | Handles member add/remove, role changes, leave group, transfer ownership |
 
 ## Usage
 

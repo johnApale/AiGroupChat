@@ -34,11 +34,13 @@ AiGroupChat.API/
 
 ## Controllers
 
-| Controller         | Route         | Purpose                    |
-| ------------------ | ------------- | -------------------------- |
-| `AuthController`   | `/api/auth`   | Authentication endpoints   |
-| `UsersController`  | `/api/users`  | User profile endpoints     |
-| `GroupsController` | `/api/groups` | Group management endpoints |
+| Controller               | Route                     | Purpose                     |
+| ------------------------ | ------------------------- | --------------------------- |
+| `AuthController`         | `/api/auth`               | Authentication endpoints    |
+| `UsersController`        | `/api/users`              | User profile endpoints      |
+| `GroupsController`       | `/api/groups`             | Group management endpoints  |
+| `GroupMembersController` | `/api/groups/:id/members` | Member management endpoints |
+| `GroupOwnerController`   | `/api/groups/:id/owner`   | Ownership transfer endpoint |
 
 ## Authentication Endpoints
 
@@ -69,6 +71,19 @@ AiGroupChat.API/
 | GET    | `/api/groups/:id` | Get group details with members | Yes (member)  |
 | PUT    | `/api/groups/:id` | Update group name              | Yes (admin)   |
 | DELETE | `/api/groups/:id` | Delete group                   | Yes (admin)   |
+
+## Group Member Endpoints
+
+| Method | Endpoint                          | Description        | Auth Required |
+| ------ | --------------------------------- | ------------------ | ------------- |
+| POST   | `/api/groups/:id/members`         | Add member         | Yes (admin)   |
+| GET    | `/api/groups/:id/members`         | List members       | Yes (member)  |
+| PUT    | `/api/groups/:id/members/:userId` | Update member role | Yes (owner)   |
+| DELETE | `/api/groups/:id/members/:userId` | Remove member      | Yes (admin\*) |
+| DELETE | `/api/groups/:id/members/me`      | Leave group        | Yes (member)  |
+| PUT    | `/api/groups/:id/owner`           | Transfer ownership | Yes (owner)   |
+
+\*Admin can only remove Members, Owner can remove anyone except themselves
 
 ## Middleware
 

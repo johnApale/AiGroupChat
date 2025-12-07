@@ -48,4 +48,24 @@ public interface IGroupRepository
     /// Add a member to a group
     /// </summary>
     Task<GroupMember> AddMemberAsync(GroupMember member, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Get a specific member of a group
+    /// </summary>
+    Task<GroupMember?> GetMemberAsync(Guid groupId, string userId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Update a group member
+    /// </summary>
+    Task<GroupMember> UpdateMemberAsync(GroupMember member, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Remove a member from a group
+    /// </summary>
+    Task RemoveMemberAsync(GroupMember member, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Count the number of admins in a group (includes Owner)
+    /// </summary>
+    Task<int> CountAdminsAsync(Guid groupId, CancellationToken cancellationToken = default);
 }

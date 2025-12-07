@@ -52,10 +52,10 @@ AiGroupChat.Infrastructure/
 
 ## Repositories
 
-| Repository               | Interface          | Purpose                            |
-| ------------------------ | ------------------ | ---------------------------------- |
-| `IdentityUserRepository` | `IUserRepository`  | Wraps ASP.NET Identity UserManager |
-| `GroupRepository`        | `IGroupRepository` | Group CRUD and membership checks   |
+| Repository               | Interface          | Purpose                                              |
+| ------------------------ | ------------------ | ---------------------------------------------------- |
+| `IdentityUserRepository` | `IUserRepository`  | Wraps ASP.NET Identity UserManager                   |
+| `GroupRepository`        | `IGroupRepository` | Group CRUD, membership checks, and member management |
 
 ## Services
 
@@ -105,7 +105,7 @@ This registers:
 - Database context
 - ASP.NET Identity
 - JWT settings
-- Repositories (`IUserRepository`)
+- Repositories (`IUserRepository`, `IGroupRepository`)
 - Services (`ITokenService`)
 - Application layer services
 - Email services

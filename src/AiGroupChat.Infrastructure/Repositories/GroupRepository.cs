@@ -77,4 +77,30 @@ public class GroupRepository : IGroupRepository
         await _context.SaveChangesAsync(cancellationToken);
         return member;
     }
+    
+    public async Task<GroupMember?> GetMemberAsync(Guid groupId, string userId, CancellationToken cancellationToken = default)
+    {
+        return await _context.GroupMembers
+            .Include(m => m.User)
+            .FirstOrDefaultAsync(m => m.GroupId == groupId && m.UserId == userId, cancellationToken);
+    }
+
+    public async Task<GroupMember> UpdateMemberAsync(GroupMember member, CancellationToken cancellationToken = default)
+    {
+        _context.GroupMembers.Update(member);
+        await _context.SaveChangesAsync(cancellationToken);
+        return member;
+    }
+
+    public async Task RemoveMemberAsync(GroupMember member, CancellationToken cancellationToken = default)
+    {
+        _context.GroupMembers.Remove(member);
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<int> CountAdminsAsync(Guid groupId, CancellationToken cancellationToken = default)
+    {
+        return await _context.GroupMembers
+            .CountAsync(m => m.GroupId == groupId && (m.Role == GroupRole.Admin || m.Role == GroupRole.Owner), cancellationToken);
+    }
 }
