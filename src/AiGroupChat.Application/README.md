@@ -61,6 +61,7 @@ DTOs (Data Transfer Objects) define the shape of data for API requests and respo
 | `LogoutRequest`             | Logout input                                 |
 | `AuthResponse`              | Authentication response with tokens and user |
 | `MessageResponse`           | Simple message response                      |
+| `UserResponse`              | User profile data                            |
 
 ## Interfaces
 
@@ -72,6 +73,7 @@ Interfaces define contracts that are implemented in other layers.
 | `ITokenService`   | Infrastructure | JWT and refresh token handling    |
 | `IUserRepository` | Infrastructure | User data access (wraps Identity) |
 | `IEmailService`   | Email          | Email sending                     |
+| `IUserService`    | Application    | User profile retrieval            |
 
 ## Exceptions
 
@@ -88,6 +90,7 @@ Custom exceptions for consistent error handling.
 | Service       | Purpose                                                    |
 | ------------- | ---------------------------------------------------------- |
 | `AuthService` | Handles registration, login, password reset, token refresh |
+| `UserService` | Handles user lookup by ID and current user retrieval       |
 
 ## Usage
 

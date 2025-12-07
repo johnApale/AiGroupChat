@@ -34,9 +34,10 @@ AiGroupChat.API/
 
 ## Controllers
 
-| Controller       | Route       | Purpose                  |
-| ---------------- | ----------- | ------------------------ |
-| `AuthController` | `/api/auth` | Authentication endpoints |
+| Controller        | Route        | Purpose                  |
+| ----------------- | ------------ | ------------------------ |
+| `AuthController`  | `/api/auth`  | Authentication endpoints |
+| `UsersController` | `/api/users` | User profile endpoints   |
 
 ## Authentication Endpoints
 
@@ -50,6 +51,13 @@ AiGroupChat.API/
 | POST   | `/api/auth/reset-password`      | Reset password with token                    |
 | POST   | `/api/auth/refresh`             | Refresh access token                         |
 | POST   | `/api/auth/logout`              | Revoke refresh token                         |
+
+## User Endpoints
+
+| Method | Endpoint         | Description                    | Auth Required |
+| ------ | ---------------- | ------------------------------ | ------------- |
+| GET    | `/api/users/me`  | Get current authenticated user | Yes           |
+| GET    | `/api/users/:id` | Get user by ID                 | Yes           |
 
 ## Middleware
 
