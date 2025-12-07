@@ -62,18 +62,24 @@ DTOs (Data Transfer Objects) define the shape of data for API requests and respo
 | `AuthResponse`              | Authentication response with tokens and user |
 | `MessageResponse`           | Simple message response                      |
 | `UserResponse`              | User profile data                            |
+| `CreateGroupRequest`        | Group creation input                         |
+| `UpdateGroupRequest`        | Group update input                           |
+| `GroupResponse`             | Group details with members                   |
+| `GroupMemberResponse`       | Group member profile data                    |
 
 ## Interfaces
 
 Interfaces define contracts that are implemented in other layers.
 
-| Interface         | Implemented In | Purpose                           |
-| ----------------- | -------------- | --------------------------------- |
-| `IAuthService`    | Application    | Authentication business logic     |
-| `ITokenService`   | Infrastructure | JWT and refresh token handling    |
-| `IUserRepository` | Infrastructure | User data access (wraps Identity) |
-| `IEmailService`   | Email          | Email sending                     |
-| `IUserService`    | Application    | User profile retrieval            |
+| Interface          | Implemented In | Purpose                           |
+| ------------------ | -------------- | --------------------------------- |
+| `IAuthService`     | Application    | Authentication business logic     |
+| `ITokenService`    | Infrastructure | JWT and refresh token handling    |
+| `IUserRepository`  | Infrastructure | User data access (wraps Identity) |
+| `IEmailService`    | Email          | Email sending                     |
+| `IUserService`     | Application    | User profile retrieval            |
+| `IGroupRepository` | Infrastructure | Group data access                 |
+| `IGroupService`    | Application    | Group CRUD and authorization      |
 
 ## Exceptions
 
@@ -84,13 +90,15 @@ Custom exceptions for consistent error handling.
 | `AuthenticationException` | 401         | Invalid credentials, unconfirmed email  |
 | `ValidationException`     | 400         | Invalid input, business rule violations |
 | `NotFoundException`       | 404         | Resource not found                      |
+| `AuthorizationException`  | 403         | User lacks permission for action        |
 
 ## Services
 
-| Service       | Purpose                                                    |
-| ------------- | ---------------------------------------------------------- |
-| `AuthService` | Handles registration, login, password reset, token refresh |
-| `UserService` | Handles user lookup by ID and current user retrieval       |
+| Service        | Purpose                                                              |
+| -------------- | -------------------------------------------------------------------- |
+| `AuthService`  | Handles registration, login, password reset, token refresh           |
+| `UserService`  | Handles user lookup by ID and current user retrieval                 |
+| `GroupService` | Handles group creation, retrieval, update, delete with authorization |
 
 ## Usage
 

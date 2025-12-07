@@ -34,10 +34,11 @@ AiGroupChat.API/
 
 ## Controllers
 
-| Controller        | Route        | Purpose                  |
-| ----------------- | ------------ | ------------------------ |
-| `AuthController`  | `/api/auth`  | Authentication endpoints |
-| `UsersController` | `/api/users` | User profile endpoints   |
+| Controller         | Route         | Purpose                    |
+| ------------------ | ------------- | -------------------------- |
+| `AuthController`   | `/api/auth`   | Authentication endpoints   |
+| `UsersController`  | `/api/users`  | User profile endpoints     |
+| `GroupsController` | `/api/groups` | Group management endpoints |
 
 ## Authentication Endpoints
 
@@ -59,6 +60,16 @@ AiGroupChat.API/
 | GET    | `/api/users/me`  | Get current authenticated user | Yes           |
 | GET    | `/api/users/:id` | Get user by ID                 | Yes           |
 
+## Group Endpoints
+
+| Method | Endpoint          | Description                    | Auth Required |
+| ------ | ----------------- | ------------------------------ | ------------- |
+| POST   | `/api/groups`     | Create group (become admin)    | Yes           |
+| GET    | `/api/groups`     | List my groups with members    | Yes           |
+| GET    | `/api/groups/:id` | Get group details with members | Yes (member)  |
+| PUT    | `/api/groups/:id` | Update group name              | Yes (admin)   |
+| DELETE | `/api/groups/:id` | Delete group                   | Yes (admin)   |
+
 ## Middleware
 
 ### ExceptionHandlingMiddleware
@@ -70,6 +81,7 @@ Centralized exception handling that converts exceptions to consistent API respon
 | `AuthenticationException` | 401         | `{ error, message }`          |
 | `ValidationException`     | 400         | `{ error, message, details }` |
 | `NotFoundException`       | 404         | `{ error, message }`          |
+| `AuthorizationException`  | 403         | `{ error, message }`          |
 | Unhandled exceptions      | 500         | `{ error, message }`          |
 
 ## Configuration

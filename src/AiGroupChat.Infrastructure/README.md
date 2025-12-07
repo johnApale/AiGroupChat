@@ -52,9 +52,10 @@ AiGroupChat.Infrastructure/
 
 ## Repositories
 
-| Repository               | Interface         | Purpose                            |
-| ------------------------ | ----------------- | ---------------------------------- |
-| `IdentityUserRepository` | `IUserRepository` | Wraps ASP.NET Identity UserManager |
+| Repository               | Interface          | Purpose                            |
+| ------------------------ | ------------------ | ---------------------------------- |
+| `IdentityUserRepository` | `IUserRepository`  | Wraps ASP.NET Identity UserManager |
+| `GroupRepository`        | `IGroupRepository` | Group CRUD and membership checks   |
 
 ## Services
 
