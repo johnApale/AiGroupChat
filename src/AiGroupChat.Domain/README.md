@@ -32,10 +32,18 @@ AiGroupChat.Domain/
 
 ## Enums
 
-| Enum         | Values            | Description                   |
-| ------------ | ----------------- | ----------------------------- |
-| `SenderType` | `User`, `Ai`      | Identifies who sent a message |
-| `GroupRole`  | `Member`, `Admin` | User's role within a group    |
+| Enum         | Values                     | Description                   |
+| ------------ | -------------------------- | ----------------------------- |
+| `SenderType` | `User`, `Ai`               | Identifies who sent a message |
+| `GroupRole`  | `Member`, `Admin`, `Owner` | User's role within a group    |
+
+### GroupRole Hierarchy
+
+| Role   | Permissions                                                              |
+| ------ | ------------------------------------------------------------------------ |
+| Owner  | All permissions, transfer ownership, delete group, promote/demote admins |
+| Admin  | Add/remove members, update group name, change AI settings                |
+| Member | View group, send messages, leave group                                   |
 
 ## Design Decisions
 

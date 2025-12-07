@@ -28,11 +28,11 @@ All test classes inherit from this base class.
 
 | File                       | Tests | Scenarios Covered                                  |
 | -------------------------- | ----- | -------------------------------------------------- |
-| `CreateAsyncTests.cs`      | 2     | Valid creation, creator becomes admin              |
+| `CreateAsyncTests.cs`      | 2     | Valid creation, creator becomes owner              |
 | `GetMyGroupsAsyncTests.cs` | 2     | Returns groups, returns empty list                 |
 | `GetByIdAsyncTests.cs`     | 3     | Valid member access, nonexistent group, non-member |
 | `UpdateAsyncTests.cs`      | 3     | Valid admin update, nonexistent group, non-admin   |
-| `DeleteAsyncTests.cs`      | 3     | Valid admin delete, nonexistent group, non-admin   |
+| `DeleteAsyncTests.cs`      | 3     | Valid owner delete, nonexistent group, non-owner   |
 
 **Total: 13 tests**
 
@@ -62,7 +62,7 @@ Examples:
 
 - `WithValidRequest_CreatesGroupAndReturnsResponse`
 - `WithNonexistentGroup_ThrowsNotFoundException`
-- `WithNonAdmin_ThrowsAuthorizationException`
+- `WithNonOwner_ThrowsAuthorizationException`
 
 ### Arrange-Act-Assert
 
@@ -93,15 +93,23 @@ Several tests verify authorization behavior:
 | ------------------------ | ------------------------------- |
 | Non-member viewing group | Throws `AuthorizationException` |
 | Non-admin updating group | Throws `AuthorizationException` |
-| Non-admin deleting group | Throws `AuthorizationException` |
+| Non-owner deleting group | Throws `AuthorizationException` |
 | Admin updating group     | Success                         |
-| Admin deleting group     | Success                         |
+| Owner deleting group     | Success                         |
+
+## Role Hierarchy
+
+| Role   | Permissions                                          |
+| ------ | ---------------------------------------------------- |
+| Owner  | All permissions, transfer ownership, delete group    |
+| Admin  | Add/remove members, update group, change AI settings |
+| Member | View group, send messages, leave group               |
 
 ## Business Rule Tests
 
 | Rule                        | Test                                                           |
 | --------------------------- | -------------------------------------------------------------- |
-| Creator becomes admin       | `CreateAsyncTests.WithValidRequest_AddsCreatorAsAdmin`         |
+| Creator becomes owner       | `CreateAsyncTests.WithValidRequest_AddsCreatorAsOwner`         |
 | Only members can view group | `GetByIdAsyncTests.WithNonMember_ThrowsAuthorizationException` |
 | Only admins can update      | `UpdateAsyncTests.WithNonAdmin_ThrowsAuthorizationException`   |
-| Only admins can delete      | `DeleteAsyncTests.WithNonAdmin_ThrowsAuthorizationException`   |
+| Only owner can delete       | `DeleteAsyncTests.WithNonOwner_ThrowsAuthorizationException`   |

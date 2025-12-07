@@ -37,7 +37,7 @@ public class GroupService : IGroupService
             Id = Guid.NewGuid(),
             GroupId = group.Id,
             UserId = currentUserId,
-            Role = GroupRole.Admin,
+            Role = GroupRole.Owner,
             JoinedAt = now
         };
 
@@ -106,11 +106,11 @@ public class GroupService : IGroupService
             throw new NotFoundException("Group", groupId);
         }
 
-        var isAdmin = await _groupRepository.IsAdminAsync(groupId, currentUserId, cancellationToken);
+        var isOwner = await _groupRepository.IsOwnerAsync(groupId, currentUserId, cancellationToken);
 
-        if (!isAdmin)
+        if (!isOwner)
         {
-            throw new AuthorizationException("Only group admins can delete the group.");
+            throw new AuthorizationException("Only the group owner can delete the group.");
         }
 
         await _groupRepository.DeleteAsync(group, cancellationToken);

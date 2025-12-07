@@ -62,7 +62,13 @@ public class GroupRepository : IGroupRepository
     public async Task<bool> IsAdminAsync(Guid groupId, string userId, CancellationToken cancellationToken = default)
     {
         return await _context.GroupMembers
-            .AnyAsync(m => m.GroupId == groupId && m.UserId == userId && m.Role == GroupRole.Admin, cancellationToken);
+            .AnyAsync(m => m.GroupId == groupId && m.UserId == userId && (m.Role == GroupRole.Admin || m.Role == GroupRole.Owner), cancellationToken);
+    }
+
+    public async Task<bool> IsOwnerAsync(Guid groupId, string userId, CancellationToken cancellationToken = default)
+    {
+        return await _context.GroupMembers
+            .AnyAsync(m => m.GroupId == groupId && m.UserId == userId && m.Role == GroupRole.Owner, cancellationToken);
     }
 
     public async Task<GroupMember> AddMemberAsync(GroupMember member, CancellationToken cancellationToken = default)

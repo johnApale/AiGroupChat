@@ -42,7 +42,7 @@ public class CreateAsyncTests : GroupServiceTestBase
                         Id = Guid.NewGuid(),
                         GroupId = id,
                         UserId = currentUserId,
-                        Role = GroupRole.Admin,
+                        Role = GroupRole.Owner,
                         JoinedAt = DateTime.UtcNow,
                         User = new User
                         {
@@ -64,11 +64,11 @@ public class CreateAsyncTests : GroupServiceTestBase
         Assert.False(result.AiMonitoringEnabled);
         Assert.Single(result.Members);
         Assert.Equal(currentUserId, result.Members[0].UserId);
-        Assert.Equal("Admin", result.Members[0].Role);
+        Assert.Equal("Owner", result.Members[0].Role);
     }
 
     [Fact]
-    public async Task WithValidRequest_AddsCreatorAsAdmin()
+    public async Task WithValidRequest_AddsCreatorAsOwner()
     {
         // Arrange
         var request = new CreateGroupRequest
@@ -103,7 +103,7 @@ public class CreateAsyncTests : GroupServiceTestBase
             x => x.AddMemberAsync(
                 It.Is<GroupMember>(m => 
                     m.UserId == currentUserId && 
-                    m.Role == GroupRole.Admin),
+                    m.Role == GroupRole.Owner),
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }

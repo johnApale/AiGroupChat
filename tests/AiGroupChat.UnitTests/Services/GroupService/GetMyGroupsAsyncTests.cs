@@ -25,7 +25,7 @@ public class GetMyGroupsAsyncTests : GroupServiceTestBase
                     new GroupMember
                     {
                         UserId = currentUserId,
-                        Role = GroupRole.Admin,
+                        Role = GroupRole.Owner,
                         JoinedAt = DateTime.UtcNow,
                         User = new User { Id = currentUserId, UserName = "testuser", DisplayName = "Test User" }
                     }

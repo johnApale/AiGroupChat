@@ -35,9 +35,14 @@ public interface IGroupRepository
     Task<bool> IsMemberAsync(Guid groupId, string userId, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Check if a user is an admin of a group
+    /// Check if a user is an admin or owner of a group
     /// </summary>
     Task<bool> IsAdminAsync(Guid groupId, string userId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Check if a user is the owner of a group
+    /// </summary>
+    Task<bool> IsOwnerAsync(Guid groupId, string userId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Add a member to a group

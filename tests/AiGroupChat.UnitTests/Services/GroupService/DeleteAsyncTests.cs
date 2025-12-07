@@ -8,7 +8,7 @@ namespace AiGroupChat.UnitTests.Services.GroupService;
 public class DeleteAsyncTests : GroupServiceTestBase
 {
     [Fact]
-    public async Task WithValidIdAndAdmin_DeletesGroup()
+    public async Task WithValidIdAndOwner_DeletesGroup()
     {
         // Arrange
         var groupId = Guid.NewGuid();
@@ -24,7 +24,7 @@ public class DeleteAsyncTests : GroupServiceTestBase
                 new GroupMember
                 {
                     UserId = currentUserId,
-                    Role = GroupRole.Admin,
+                    Role = GroupRole.Owner,
                     User = new User { Id = currentUserId }
                 }
             }
@@ -35,7 +35,7 @@ public class DeleteAsyncTests : GroupServiceTestBase
             .ReturnsAsync(group);
 
         GroupRepositoryMock
-            .Setup(x => x.IsAdminAsync(groupId, currentUserId, It.IsAny<CancellationToken>()))
+            .Setup(x => x.IsOwnerAsync(groupId, currentUserId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
         GroupRepositoryMock
@@ -71,7 +71,7 @@ public class DeleteAsyncTests : GroupServiceTestBase
     }
 
     [Fact]
-    public async Task WithNonAdmin_ThrowsAuthorizationException()
+    public async Task WithNonOwner_ThrowsAuthorizationException()
     {
         // Arrange
         var groupId = Guid.NewGuid();
@@ -87,7 +87,7 @@ public class DeleteAsyncTests : GroupServiceTestBase
                 new GroupMember
                 {
                     UserId = currentUserId,
-                    Role = GroupRole.Member,
+                    Role = GroupRole.Admin,
                     User = new User { Id = currentUserId }
                 }
             }
@@ -98,7 +98,7 @@ public class DeleteAsyncTests : GroupServiceTestBase
             .ReturnsAsync(group);
 
         GroupRepositoryMock
-            .Setup(x => x.IsAdminAsync(groupId, currentUserId, It.IsAny<CancellationToken>()))
+            .Setup(x => x.IsOwnerAsync(groupId, currentUserId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
 
         // Act & Assert
@@ -106,6 +106,6 @@ public class DeleteAsyncTests : GroupServiceTestBase
             () => GroupService.DeleteAsync(groupId, currentUserId)
         );
 
-        Assert.Contains("admin", exception.Message.ToLower());
+        Assert.Contains("owner", exception.Message.ToLower());
     }
 }
