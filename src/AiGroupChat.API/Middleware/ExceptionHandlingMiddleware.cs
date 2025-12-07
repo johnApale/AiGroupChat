@@ -34,6 +34,10 @@ public class ExceptionHandlingMiddleware
                 StatusCodes.Status401Unauthorized,
                 new ErrorResponse("AuthenticationError", ex.Message)
             ),
+            AuthorizationException ex => (
+                StatusCodes.Status403Forbidden,
+                new ErrorResponse("Forbidden", ex.Message)
+            ),
             ValidationException ex => (
                 StatusCodes.Status400BadRequest,
                 new ErrorResponse("ValidationError", ex.Message, ex.Errors)
