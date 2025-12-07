@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: aigroupchat-db
+    environment:
+      POSTGRES_USER: aigroupchat
+      POSTGRES_PASSWORD: devpassword123
+      POSTGRES_DB: aigroupchat_dev
+    ports:
+      - "5434:5432"
+    volumes:
+      - aigroupchat_postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  aigroupchat_postgres_data:
