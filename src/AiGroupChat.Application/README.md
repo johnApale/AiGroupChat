@@ -66,21 +66,24 @@ DTOs (Data Transfer Objects) define the shape of data for API requests and respo
 | `UpdateGroupRequest`        | Group update input                           |
 | `GroupResponse`             | Group details with members                   |
 | `GroupMemberResponse`       | Group member profile data                    |
+| `AiProviderResponse`        | AI provider details (id, name, model, etc.)  |
 
 ## Interfaces
 
 Interfaces define contracts that are implemented in other layers.
 
-| Interface             | Implemented In | Purpose                           |
-| --------------------- | -------------- | --------------------------------- |
-| `IAuthService`        | Application    | Authentication business logic     |
-| `ITokenService`       | Infrastructure | JWT and refresh token handling    |
-| `IUserRepository`     | Infrastructure | User data access (wraps Identity) |
-| `IEmailService`       | Email          | Email sending                     |
-| `IUserService`        | Application    | User profile retrieval            |
-| `IGroupRepository`    | Infrastructure | Group data access                 |
-| `IGroupService`       | Application    | Group CRUD and authorization      |
-| `IGroupMemberService` | Application    | Group member management           |
+| Interface               | Implemented In | Purpose                           |
+| ----------------------- | -------------- | --------------------------------- |
+| `IAuthService`          | Application    | Authentication business logic     |
+| `ITokenService`         | Infrastructure | JWT and refresh token handling    |
+| `IUserRepository`       | Infrastructure | User data access (wraps Identity) |
+| `IEmailService`         | Email          | Email sending                     |
+| `IUserService`          | Application    | User profile retrieval            |
+| `IGroupRepository`      | Infrastructure | Group data access                 |
+| `IGroupService`         | Application    | Group CRUD and authorization      |
+| `IGroupMemberService`   | Application    | Group member management           |
+| `IAiProviderRepository` | Infrastructure | AI provider data access           |
+| `IAiProviderService`    | Application    | AI provider listing and retrieval |
 
 ## Exceptions
 
@@ -101,6 +104,7 @@ Custom exceptions for consistent error handling.
 | `UserService`        | Handles user lookup by ID and current user retrieval                     |
 | `GroupService`       | Handles group creation, retrieval, update, delete with authorization     |
 | `GroupMemberService` | Handles member add/remove, role changes, leave group, transfer ownership |
+| `AiProviderService`  | Handles listing and retrieving enabled AI providers                      |
 
 ## Usage
 

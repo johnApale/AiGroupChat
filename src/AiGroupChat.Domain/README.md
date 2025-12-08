@@ -30,6 +30,22 @@ AiGroupChat.Domain/
 | `AiResponseMetadata` | Token usage and cost tracking for AI responses          |
 | `RefreshToken`       | JWT refresh token for authentication                    |
 
+## AiProvider Fields
+
+| Field                | Type    | Description                              |
+| -------------------- | ------- | ---------------------------------------- |
+| `Id`                 | Guid    | Primary key                              |
+| `Name`               | string  | Unique identifier (gemini, claude, etc.) |
+| `DisplayName`        | string  | Human-readable name                      |
+| `IsEnabled`          | bool    | Whether provider is available for use    |
+| `SortOrder`          | int     | Display order (lower = higher priority)  |
+| `BaseUrl`            | string? | Custom API endpoint (nullable)           |
+| `DefaultModel`       | string  | Default model name                       |
+| `DefaultTemperature` | decimal | Default temperature setting              |
+| `MaxTokensLimit`     | int     | Maximum context window size              |
+| `InputTokenCost`     | decimal | Cost per 1K input tokens                 |
+| `OutputTokenCost`    | decimal | Cost per 1K output tokens                |
+
 ## Enums
 
 | Enum         | Values                     | Description                   |

@@ -41,6 +41,7 @@ AiGroupChat.API/
 | `GroupsController`       | `/api/groups`             | Group management endpoints  |
 | `GroupMembersController` | `/api/groups/:id/members` | Member management endpoints |
 | `GroupOwnerController`   | `/api/groups/:id/owner`   | Ownership transfer endpoint |
+| `AiProvidersController`  | `/api/ai-providers`       | AI provider endpoints       |
 
 ## Authentication Endpoints
 
@@ -84,6 +85,13 @@ AiGroupChat.API/
 | PUT    | `/api/groups/:id/owner`           | Transfer ownership | Yes (owner)   |
 
 \*Admin can only remove Members, Owner can remove anyone except themselves
+
+## AI Provider Endpoints
+
+| Method | Endpoint                | Description                | Auth Required |
+| ------ | ----------------------- | -------------------------- | ------------- |
+| GET    | `/api/ai-providers`     | List all enabled providers | Yes           |
+| GET    | `/api/ai-providers/:id` | Get provider by ID         | Yes           |
 
 ## Middleware
 

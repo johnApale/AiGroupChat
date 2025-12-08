@@ -20,21 +20,23 @@ GroupService/
 `GroupServiceTestBase` provides shared setup for all test classes:
 
 - `GroupRepositoryMock` - Mocked `IGroupRepository`
+- `AiProviderRepositoryMock` - Mocked `IAiProviderRepository`
+- `DefaultAiProvider` - Test AI provider for group creation
 - `GroupService` - Instance under test with mocked dependencies
 
 All test classes inherit from this base class.
 
 ## Test Coverage
 
-| File                       | Tests | Scenarios Covered                                  |
-| -------------------------- | ----- | -------------------------------------------------- |
-| `CreateAsyncTests.cs`      | 2     | Valid creation, creator becomes owner              |
-| `GetMyGroupsAsyncTests.cs` | 2     | Returns groups, returns empty list                 |
-| `GetByIdAsyncTests.cs`     | 3     | Valid member access, nonexistent group, non-member |
-| `UpdateAsyncTests.cs`      | 3     | Valid admin update, nonexistent group, non-admin   |
-| `DeleteAsyncTests.cs`      | 3     | Valid owner delete, nonexistent group, non-owner   |
+| File                       | Tests | Scenarios Covered                                                                   |
+| -------------------------- | ----- | ----------------------------------------------------------------------------------- |
+| `CreateAsyncTests.cs`      | 4     | Valid creation, creator becomes owner, assigns default provider, no providers error |
+| `GetMyGroupsAsyncTests.cs` | 2     | Returns groups, returns empty list                                                  |
+| `GetByIdAsyncTests.cs`     | 3     | Valid member access, nonexistent group, non-member                                  |
+| `UpdateAsyncTests.cs`      | 3     | Valid admin update, nonexistent group, non-admin                                    |
+| `DeleteAsyncTests.cs`      | 3     | Valid owner delete, nonexistent group, non-owner                                    |
 
-**Total: 13 tests**
+**Total: 15 tests**
 
 ## Running Tests
 
