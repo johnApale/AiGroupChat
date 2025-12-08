@@ -6,6 +6,7 @@ public class AiProvider
     public string Name { get; set; } = string.Empty;
     public string DisplayName { get; set; } = string.Empty;
     public bool IsEnabled { get; set; } = true;
+    public int SortOrder { get; set; } = 0;
     public string? BaseUrl { get; set; }
     public string DefaultModel { get; set; } = string.Empty;
     public decimal DefaultTemperature { get; set; } = 0.7m;

@@ -29,7 +29,8 @@ public class GroupConfiguration : IEntityTypeConfiguration<Group>
             .HasDefaultValue(false);
 
         builder.Property(x => x.AiProviderId)
-            .HasColumnName("ai_provider_id");
+            .HasColumnName("ai_provider_id")
+            .IsRequired();
 
         builder.Property(x => x.CreatedAt)
             .HasColumnName("created_at");
@@ -45,6 +46,6 @@ public class GroupConfiguration : IEntityTypeConfiguration<Group>
         builder.HasOne(x => x.AiProvider)
             .WithMany(p => p.Groups)
             .HasForeignKey(x => x.AiProviderId)
-            .OnDelete(DeleteBehavior.SetNull);
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

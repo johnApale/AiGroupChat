@@ -9,14 +9,20 @@ namespace AiGroupChat.Application.Services;
 public class GroupService : IGroupService
 {
     private readonly IGroupRepository _groupRepository;
+    private readonly IAiProviderRepository _aiProviderRepository;
 
-    public GroupService(IGroupRepository groupRepository)
+    public GroupService(IGroupRepository groupRepository, IAiProviderRepository aiProviderRepository)
     {
         _groupRepository = groupRepository;
+        _aiProviderRepository = aiProviderRepository;
     }
 
     public async Task<GroupResponse> CreateAsync(CreateGroupRequest request, string currentUserId, CancellationToken cancellationToken = default)
     {
+        // Get default AI provider (first enabled by sort order)
+        var defaultProvider = await _aiProviderRepository.GetDefaultAsync(cancellationToken)
+            ?? throw new ValidationException("No AI providers are available. Please contact an administrator.");
+
         var now = DateTime.UtcNow;
 
         var group = new Group
@@ -25,6 +31,7 @@ public class GroupService : IGroupService
             Name = request.Name,
             CreatedById = currentUserId,
             AiMonitoringEnabled = false,
+            AiProviderId = defaultProvider.Id,
             CreatedAt = now,
             UpdatedAt = now
         };

@@ -50,6 +50,7 @@ public static class DependencyInjection
         // Repositories
         services.AddScoped<IUserRepository, IdentityUserRepository>();
         services.AddScoped<IGroupRepository, GroupRepository>();
+        services.AddScoped<IAiProviderRepository, AiProviderRepository>();
     
         // Services
         services.AddScoped<ITokenService, TokenService>();

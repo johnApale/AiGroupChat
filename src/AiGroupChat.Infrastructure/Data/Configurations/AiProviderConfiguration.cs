@@ -29,6 +29,10 @@ public class AiProviderConfiguration : IEntityTypeConfiguration<AiProvider>
             .HasColumnName("is_enabled")
             .HasDefaultValue(true);
 
+        builder.Property(x => x.SortOrder)
+            .HasColumnName("sort_order")
+            .HasDefaultValue(0);
+
         builder.Property(x => x.BaseUrl)
             .HasColumnName("base_url")
             .HasMaxLength(500);
