@@ -27,7 +27,7 @@ public class CreateAsyncTests : GroupServiceTestBase
             .ReturnsAsync((GroupMember m, CancellationToken _) => m);
 
         GroupRepositoryMock
-            .Setup(x => x.GetByIdWithMembersAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((Guid id, CancellationToken _) => new Group
             {
                 Id = id,
@@ -35,6 +35,7 @@ public class CreateAsyncTests : GroupServiceTestBase
                 CreatedById = currentUserId,
                 AiMonitoringEnabled = false,
                 AiProviderId = DefaultAiProvider.Id,
+                AiProvider = DefaultAiProvider,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
                 Members = new List<GroupMember>
@@ -88,13 +89,14 @@ public class CreateAsyncTests : GroupServiceTestBase
             .ReturnsAsync((GroupMember m, CancellationToken _) => m);
 
         GroupRepositoryMock
-            .Setup(x => x.GetByIdWithMembersAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Group
             {
                 Id = Guid.NewGuid(),
                 Name = request.Name,
                 CreatedById = currentUserId,
                 AiProviderId = DefaultAiProvider.Id,
+                AiProvider = DefaultAiProvider,
                 Members = new List<GroupMember>()
             });
 
@@ -149,13 +151,14 @@ public class CreateAsyncTests : GroupServiceTestBase
             .ReturnsAsync((GroupMember m, CancellationToken _) => m);
 
         GroupRepositoryMock
-            .Setup(x => x.GetByIdWithMembersAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new Group
             {
                 Id = Guid.NewGuid(),
                 Name = request.Name,
                 CreatedById = currentUserId,
                 AiProviderId = DefaultAiProvider.Id,
+                AiProvider = DefaultAiProvider,
                 Members = new List<GroupMember>()
             });
 

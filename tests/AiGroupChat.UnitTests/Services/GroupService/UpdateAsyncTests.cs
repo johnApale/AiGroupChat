@@ -24,6 +24,8 @@ public class UpdateAsyncTests : GroupServiceTestBase
             Id = groupId,
             Name = "Original Name",
             CreatedById = currentUserId,
+            AiProviderId = DefaultAiProvider.Id,
+            AiProvider = DefaultAiProvider,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
             Members = new List<GroupMember>
@@ -39,7 +41,7 @@ public class UpdateAsyncTests : GroupServiceTestBase
         };
 
         GroupRepositoryMock
-            .Setup(x => x.GetByIdWithMembersAsync(groupId, It.IsAny<CancellationToken>()))
+            .Setup(x => x.GetByIdAsync(groupId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(group);
 
         GroupRepositoryMock
@@ -67,7 +69,7 @@ public class UpdateAsyncTests : GroupServiceTestBase
         var request = new UpdateGroupRequest { Name = "Updated Name" };
 
         GroupRepositoryMock
-            .Setup(x => x.GetByIdWithMembersAsync(groupId, It.IsAny<CancellationToken>()))
+            .Setup(x => x.GetByIdAsync(groupId, It.IsAny<CancellationToken>()))
             .ReturnsAsync((Group?)null);
 
         // Act & Assert
@@ -91,6 +93,8 @@ public class UpdateAsyncTests : GroupServiceTestBase
             Id = groupId,
             Name = "Original Name",
             CreatedById = "other-user",
+            AiProviderId = DefaultAiProvider.Id,
+            AiProvider = DefaultAiProvider,
             Members = new List<GroupMember>
             {
                 new GroupMember
@@ -103,7 +107,7 @@ public class UpdateAsyncTests : GroupServiceTestBase
         };
 
         GroupRepositoryMock
-            .Setup(x => x.GetByIdWithMembersAsync(groupId, It.IsAny<CancellationToken>()))
+            .Setup(x => x.GetByIdAsync(groupId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(group);
 
         GroupRepositoryMock

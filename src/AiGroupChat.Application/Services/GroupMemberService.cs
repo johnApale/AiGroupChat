@@ -20,7 +20,7 @@ public class GroupMemberService : IGroupMemberService
     public async Task<GroupMemberResponse> AddMemberAsync(Guid groupId, AddMemberRequest request, string currentUserId, CancellationToken cancellationToken = default)
     {
         // Verify group exists
-        var group = await _groupRepository.GetByIdWithMembersAsync(groupId, cancellationToken);
+        var group = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
         if (group == null)
         {
             throw new NotFoundException("Group", groupId);
@@ -67,7 +67,7 @@ public class GroupMemberService : IGroupMemberService
     public async Task<List<GroupMemberResponse>> GetMembersAsync(Guid groupId, string currentUserId, CancellationToken cancellationToken = default)
     {
         // Verify group exists
-        var group = await _groupRepository.GetByIdWithMembersAsync(groupId, cancellationToken);
+        var group = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
         if (group == null)
         {
             throw new NotFoundException("Group", groupId);
@@ -86,7 +86,7 @@ public class GroupMemberService : IGroupMemberService
     public async Task<GroupMemberResponse> UpdateMemberRoleAsync(Guid groupId, string userId, UpdateMemberRoleRequest request, string currentUserId, CancellationToken cancellationToken = default)
     {
         // Verify group exists
-        var group = await _groupRepository.GetByIdWithMembersAsync(groupId, cancellationToken);
+        var group = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
         if (group == null)
         {
             throw new NotFoundException("Group", groupId);
@@ -127,7 +127,7 @@ public class GroupMemberService : IGroupMemberService
     public async Task RemoveMemberAsync(Guid groupId, string userId, string currentUserId, CancellationToken cancellationToken = default)
     {
         // Verify group exists
-        var group = await _groupRepository.GetByIdWithMembersAsync(groupId, cancellationToken);
+        var group = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
         if (group == null)
         {
             throw new NotFoundException("Group", groupId);
@@ -167,7 +167,7 @@ public class GroupMemberService : IGroupMemberService
     public async Task LeaveGroupAsync(Guid groupId, string currentUserId, CancellationToken cancellationToken = default)
     {
         // Verify group exists
-        var group = await _groupRepository.GetByIdWithMembersAsync(groupId, cancellationToken);
+        var group = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
         if (group == null)
         {
             throw new NotFoundException("Group", groupId);
@@ -192,7 +192,7 @@ public class GroupMemberService : IGroupMemberService
     public async Task<GroupMemberResponse> TransferOwnershipAsync(Guid groupId, TransferOwnershipRequest request, string currentUserId, CancellationToken cancellationToken = default)
     {
         // Verify group exists
-        var group = await _groupRepository.GetByIdWithMembersAsync(groupId, cancellationToken);
+        var group = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
         if (group == null)
         {
             throw new NotFoundException("Group", groupId);

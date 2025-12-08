@@ -10,12 +10,12 @@ public interface IGroupRepository
     Task<Group> CreateAsync(Group group, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Get a group by ID with members included
+    /// Get a group by ID with members and AI provider included
     /// </summary>
-    Task<Group?> GetByIdWithMembersAsync(Guid groupId, CancellationToken cancellationToken = default);
+    Task<Group?> GetByIdAsync(Guid groupId, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Get all groups where the user is a member, with members included
+    /// Get all groups where the user is a member, with members and AI provider included
     /// </summary>
     Task<List<Group>> GetGroupsByUserIdAsync(string userId, CancellationToken cancellationToken = default);
 

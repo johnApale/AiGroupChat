@@ -18,6 +18,8 @@ public class GetMyGroupsAsyncTests : GroupServiceTestBase
                 Id = Guid.NewGuid(),
                 Name = "Group 1",
                 CreatedById = currentUserId,
+                AiProviderId = DefaultAiProvider.Id,
+                AiProvider = DefaultAiProvider,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
                 Members = new List<GroupMember>
@@ -36,6 +38,8 @@ public class GetMyGroupsAsyncTests : GroupServiceTestBase
                 Id = Guid.NewGuid(),
                 Name = "Group 2",
                 CreatedById = "other-user",
+                AiProviderId = DefaultAiProvider.Id,
+                AiProvider = DefaultAiProvider,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
                 Members = new List<GroupMember>

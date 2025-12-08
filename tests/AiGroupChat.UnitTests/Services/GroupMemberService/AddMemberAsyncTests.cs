@@ -32,7 +32,7 @@ public class AddMemberAsyncTests : GroupMemberServiceTestBase
         };
 
         GroupRepositoryMock
-            .Setup(x => x.GetByIdWithMembersAsync(groupId, It.IsAny<CancellationToken>()))
+            .Setup(x => x.GetByIdAsync(groupId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(group);
 
         GroupRepositoryMock
@@ -79,7 +79,7 @@ public class AddMemberAsyncTests : GroupMemberServiceTestBase
         var request = new AddMemberRequest { UserId = "new-user-id" };
 
         GroupRepositoryMock
-            .Setup(x => x.GetByIdWithMembersAsync(groupId, It.IsAny<CancellationToken>()))
+            .Setup(x => x.GetByIdAsync(groupId, It.IsAny<CancellationToken>()))
             .ReturnsAsync((Group?)null);
 
         // Act & Assert
@@ -100,7 +100,7 @@ public class AddMemberAsyncTests : GroupMemberServiceTestBase
         var group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
 
         GroupRepositoryMock
-            .Setup(x => x.GetByIdWithMembersAsync(groupId, It.IsAny<CancellationToken>()))
+            .Setup(x => x.GetByIdAsync(groupId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(group);
 
         GroupRepositoryMock
@@ -126,7 +126,7 @@ public class AddMemberAsyncTests : GroupMemberServiceTestBase
         var group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
 
         GroupRepositoryMock
-            .Setup(x => x.GetByIdWithMembersAsync(groupId, It.IsAny<CancellationToken>()))
+            .Setup(x => x.GetByIdAsync(groupId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(group);
 
         GroupRepositoryMock
@@ -158,7 +158,7 @@ public class AddMemberAsyncTests : GroupMemberServiceTestBase
         var existingMember = new GroupMember { UserId = existingUserId, User = existingUser };
 
         GroupRepositoryMock
-            .Setup(x => x.GetByIdWithMembersAsync(groupId, It.IsAny<CancellationToken>()))
+            .Setup(x => x.GetByIdAsync(groupId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(group);
 
         GroupRepositoryMock

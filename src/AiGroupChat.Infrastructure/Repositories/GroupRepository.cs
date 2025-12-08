@@ -22,11 +22,12 @@ public class GroupRepository : IGroupRepository
         return group;
     }
 
-    public async Task<Group?> GetByIdWithMembersAsync(Guid groupId, CancellationToken cancellationToken = default)
+    public async Task<Group?> GetByIdAsync(Guid groupId, CancellationToken cancellationToken = default)
     {
         return await _context.Groups
             .Include(g => g.Members)
                 .ThenInclude(m => m.User)
+            .Include(g => g.AiProvider)
             .FirstOrDefaultAsync(g => g.Id == groupId, cancellationToken);
     }
 
@@ -35,6 +36,7 @@ public class GroupRepository : IGroupRepository
         return await _context.Groups
             .Include(g => g.Members)
                 .ThenInclude(m => m.User)
+            .Include(g => g.AiProvider)
             .Where(g => g.Members.Any(m => m.UserId == userId))
             .OrderByDescending(g => g.UpdatedAt)
             .ToListAsync(cancellationToken);

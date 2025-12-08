@@ -105,11 +105,34 @@ Updated and added unit tests:
 | `MakeAiProviderIdRequired` | Made `ai_provider_id` NOT NULL on `groups`  |
 | `SeedAiProviders`          | Inserted 4 default AI providers             |
 
-#### 8. Documentation Updates
+#### 8. Refactored GroupRepository & GroupResponse
+
+Simplified repository method and enriched API response:
+
+**Repository Changes:**
+
+- Renamed `GetByIdWithMembersAsync` → `GetByIdAsync` (members always included)
+- Added `.Include(g => g.AiProvider)` to both `GetByIdAsync` and `GetGroupsByUserIdAsync`
+
+**DTO Changes:**
+
+- Added `AiProvider` property to `GroupResponse`
+- Changed `AiProviderId` from `Guid?` to `Guid` (non-nullable)
+
+**Files modified:**
+
+- `src/AiGroupChat.Application/Interfaces/IGroupRepository.cs` - Renamed method
+- `src/AiGroupChat.Infrastructure/Repositories/GroupRepository.cs` - Renamed method, added AiProvider include
+- `src/AiGroupChat.Application/DTOs/Groups/GroupResponse.cs` - Added AiProvider property
+- `src/AiGroupChat.Application/Services/GroupService.cs` - Updated method calls, MapToResponse includes AiProvider
+- `src/AiGroupChat.Application/Services/GroupMemberService.cs` - Updated method calls
+- All GroupService and GroupMemberService test files - Updated method name and mock data
+
+#### 9. Documentation Updates
 
 - `src/AiGroupChat.Domain/README.md` - Added AiProvider fields table
-- `src/AiGroupChat.Application/README.md` - Added DTOs, interfaces, services
-- `src/AiGroupChat.Infrastructure/README.md` - Added repository, updated DI list
+- `src/AiGroupChat.Application/README.md` - Added DTOs, interfaces, services; updated GroupResponse description
+- `src/AiGroupChat.Infrastructure/README.md` - Added repository, updated DI list, updated GroupRepository description
 - `src/AiGroupChat.API/README.md` - Added controller, endpoints
 - `tests/AiGroupChat.UnitTests/Services/GroupService/README.md` - Updated test counts
 - `tests/AiGroupChat.UnitTests/Services/AiProviderService/README.md` - New test docs
@@ -188,3 +211,5 @@ dotnet build
 5. **GetByIdAsync returns 404 for disabled providers** - Disabled providers treated as non-existent from client perspective.
 
 6. **Fixed provider IDs in seed** - Using predictable GUIDs (11111111-..., 22222222-...) for easier testing and references.
+
+7. **Simplified GetByIdAsync** - Renamed from `GetByIdWithMembersAsync` since members and AiProvider are always needed; cleaner API.

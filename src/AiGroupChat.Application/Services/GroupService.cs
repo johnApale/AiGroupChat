@@ -1,3 +1,4 @@
+using AiGroupChat.Application.DTOs.AiProviders;
 using AiGroupChat.Application.DTOs.Groups;
 using AiGroupChat.Application.Exceptions;
 using AiGroupChat.Application.Interfaces;
@@ -51,7 +52,7 @@ public class GroupService : IGroupService
         await _groupRepository.AddMemberAsync(member, cancellationToken);
 
         // Fetch the group with members to return
-        var createdGroup = await _groupRepository.GetByIdWithMembersAsync(group.Id, cancellationToken);
+        var createdGroup = await _groupRepository.GetByIdAsync(group.Id, cancellationToken);
         return MapToResponse(createdGroup!);
     }
 
@@ -63,7 +64,7 @@ public class GroupService : IGroupService
 
     public async Task<GroupResponse> GetByIdAsync(Guid groupId, string currentUserId, CancellationToken cancellationToken = default)
     {
-        var group = await _groupRepository.GetByIdWithMembersAsync(groupId, cancellationToken);
+        var group = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
 
         if (group == null)
         {
@@ -82,7 +83,7 @@ public class GroupService : IGroupService
 
     public async Task<GroupResponse> UpdateAsync(Guid groupId, UpdateGroupRequest request, string currentUserId, CancellationToken cancellationToken = default)
     {
-        var group = await _groupRepository.GetByIdWithMembersAsync(groupId, cancellationToken);
+        var group = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
 
         if (group == null)
         {
@@ -106,7 +107,7 @@ public class GroupService : IGroupService
 
     public async Task DeleteAsync(Guid groupId, string currentUserId, CancellationToken cancellationToken = default)
     {
-        var group = await _groupRepository.GetByIdWithMembersAsync(groupId, cancellationToken);
+        var group = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
 
         if (group == null)
         {
@@ -132,6 +133,15 @@ public class GroupService : IGroupService
             CreatedById = group.CreatedById,
             AiMonitoringEnabled = group.AiMonitoringEnabled,
             AiProviderId = group.AiProviderId,
+            AiProvider = new AiProviderResponse
+            {
+                Id = group.AiProvider.Id,
+                Name = group.AiProvider.Name,
+                DisplayName = group.AiProvider.DisplayName,
+                DefaultModel = group.AiProvider.DefaultModel,
+                DefaultTemperature = group.AiProvider.DefaultTemperature,
+                MaxTokensLimit = group.AiProvider.MaxTokensLimit
+            },
             CreatedAt = group.CreatedAt,
             UpdatedAt = group.UpdatedAt,
             Members = group.Members.Select(m => new GroupMemberResponse

@@ -64,7 +64,7 @@ DTOs (Data Transfer Objects) define the shape of data for API requests and respo
 | `UserResponse`              | User profile data                            |
 | `CreateGroupRequest`        | Group creation input                         |
 | `UpdateGroupRequest`        | Group update input                           |
-| `GroupResponse`             | Group details with members                   |
+| `GroupResponse`             | Group details with members and AI provider   |
 | `GroupMemberResponse`       | Group member profile data                    |
 | `AiProviderResponse`        | AI provider details (id, name, model, etc.)  |
 
