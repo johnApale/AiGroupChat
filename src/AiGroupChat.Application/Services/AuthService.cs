@@ -24,7 +24,7 @@ public class AuthService : IAuthService
 
     public async Task<MessageResponse> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default)
     {
-        var user = new User
+        User user = new User
         {
             Email = request.Email,
             UserName = request.UserName,
@@ -33,14 +33,14 @@ public class AuthService : IAuthService
             UpdatedAt = DateTime.UtcNow
         };
 
-        var (succeeded, errors) = await _userRepository.CreateAsync(user, request.Password, cancellationToken);
+        (bool succeeded, string[] errors) = await _userRepository.CreateAsync(user, request.Password, cancellationToken);
 
         if (!succeeded)
         {
             throw new ValidationException(errors);
         }
 
-        var token = await _userRepository.GenerateEmailConfirmationTokenAsync(user, cancellationToken);
+        string token = await _userRepository.GenerateEmailConfirmationTokenAsync(user, cancellationToken);
         await _emailService.SendConfirmationEmailAsync(user.Email!, user.DisplayName, token, cancellationToken);
 
         return new MessageResponse("Registration successful. Please check your email to confirm your account.");
@@ -48,21 +48,21 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponse> LoginAsync(LoginRequest request, CancellationToken cancellationToken = default)
     {
-        var user = await _userRepository.FindByEmailAsync(request.Email, cancellationToken);
+        User? user = await _userRepository.FindByEmailAsync(request.Email, cancellationToken);
 
         if (user == null)
         {
             throw new AuthenticationException("Invalid email or password.");
         }
 
-        var isEmailConfirmed = await _userRepository.IsEmailConfirmedAsync(user, cancellationToken);
+        bool isEmailConfirmed = await _userRepository.IsEmailConfirmedAsync(user, cancellationToken);
 
         if (!isEmailConfirmed)
         {
             throw new AuthenticationException("Please confirm your email before logging in.");
         }
 
-        var isPasswordValid = await _userRepository.CheckPasswordAsync(user, request.Password, cancellationToken);
+        bool isPasswordValid = await _userRepository.CheckPasswordAsync(user, request.Password, cancellationToken);
 
         if (!isPasswordValid)
         {
@@ -74,14 +74,14 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponse> ConfirmEmailAsync(ConfirmEmailRequest request, CancellationToken cancellationToken = default)
     {
-        var user = await _userRepository.FindByEmailAsync(request.Email, cancellationToken);
+        User? user = await _userRepository.FindByEmailAsync(request.Email, cancellationToken);
 
         if (user == null)
         {
             throw new ValidationException("Invalid confirmation request.");
         }
 
-        var succeeded = await _userRepository.ConfirmEmailAsync(user, request.Token, cancellationToken);
+        bool succeeded = await _userRepository.ConfirmEmailAsync(user, request.Token, cancellationToken);
 
         if (!succeeded)
         {
@@ -93,7 +93,7 @@ public class AuthService : IAuthService
 
     public async Task<MessageResponse> ResendConfirmationAsync(ResendConfirmationRequest request, CancellationToken cancellationToken = default)
     {
-        var user = await _userRepository.FindByEmailAsync(request.Email, cancellationToken);
+        User? user = await _userRepository.FindByEmailAsync(request.Email, cancellationToken);
 
         // Always return success to prevent email enumeration
         if (user == null)
@@ -101,11 +101,11 @@ public class AuthService : IAuthService
             return new MessageResponse("If an unconfirmed account exists with this email, a confirmation link has been sent.");
         }
 
-        var isEmailConfirmed = await _userRepository.IsEmailConfirmedAsync(user, cancellationToken);
+        bool isEmailConfirmed = await _userRepository.IsEmailConfirmedAsync(user, cancellationToken);
 
         if (!isEmailConfirmed)
         {
-            var token = await _userRepository.GenerateEmailConfirmationTokenAsync(user, cancellationToken);
+            string token = await _userRepository.GenerateEmailConfirmationTokenAsync(user, cancellationToken);
             await _emailService.SendConfirmationEmailAsync(user.Email!, user.DisplayName, token, cancellationToken);
         }
 
@@ -114,12 +114,12 @@ public class AuthService : IAuthService
 
     public async Task<MessageResponse> ForgotPasswordAsync(ForgotPasswordRequest request, CancellationToken cancellationToken = default)
     {
-        var user = await _userRepository.FindByEmailAsync(request.Email, cancellationToken);
+        User? user = await _userRepository.FindByEmailAsync(request.Email, cancellationToken);
 
         // Always return success to prevent email enumeration
         if (user != null)
         {
-            var token = await _userRepository.GeneratePasswordResetTokenAsync(user, cancellationToken);
+            string token = await _userRepository.GeneratePasswordResetTokenAsync(user, cancellationToken);
             await _emailService.SendPasswordResetEmailAsync(user.Email!, user.DisplayName, token, cancellationToken);
         }
 
@@ -128,14 +128,14 @@ public class AuthService : IAuthService
 
     public async Task<MessageResponse> ResetPasswordAsync(ResetPasswordRequest request, CancellationToken cancellationToken = default)
     {
-        var user = await _userRepository.FindByEmailAsync(request.Email, cancellationToken);
+        User? user = await _userRepository.FindByEmailAsync(request.Email, cancellationToken);
 
         if (user == null)
         {
             throw new ValidationException("Invalid password reset request.");
         }
 
-        var (succeeded, errors) = await _userRepository.ResetPasswordAsync(user, request.Token, request.NewPassword, cancellationToken);
+        (bool succeeded, string[] errors) = await _userRepository.ResetPasswordAsync(user, request.Token, request.NewPassword, cancellationToken);
 
         if (!succeeded)
         {
@@ -150,14 +150,14 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponse> RefreshTokenAsync(RefreshTokenRequest request, CancellationToken cancellationToken = default)
     {
-        var userId = await _tokenService.ValidateRefreshTokenAsync(request.RefreshToken, cancellationToken);
+        string? userId = await _tokenService.ValidateRefreshTokenAsync(request.RefreshToken, cancellationToken);
 
         if (userId == null)
         {
             throw new AuthenticationException("Invalid or expired refresh token.");
         }
 
-        var user = await _userRepository.FindByIdAsync(userId, cancellationToken);
+        User? user = await _userRepository.FindByIdAsync(userId, cancellationToken);
 
         if (user == null)
         {
@@ -179,8 +179,8 @@ public class AuthService : IAuthService
 
     private async Task<AuthResponse> GenerateAuthResponseAsync(User user, CancellationToken cancellationToken)
     {
-        var accessToken = _tokenService.GenerateAccessToken(user);
-        var refreshToken = await _tokenService.GenerateRefreshTokenAsync(user, cancellationToken);
+        string accessToken = _tokenService.GenerateAccessToken(user);
+        string refreshToken = await _tokenService.GenerateRefreshTokenAsync(user, cancellationToken);
 
         return new AuthResponse
         {

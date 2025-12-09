@@ -31,10 +31,10 @@ public class EmailService : IEmailService
         string confirmationToken, 
         CancellationToken cancellationToken = default)
     {
-        var confirmationUrl = BuildUrl(_settings.ConfirmEmailPath, confirmationToken, toEmail);
-        var (html, text) = await _templateService.RenderConfirmationEmailAsync(userName, confirmationUrl);
+        string confirmationUrl = BuildUrl(_settings.ConfirmEmailPath, confirmationToken, toEmail);
+        (string html, string text) = await _templateService.RenderConfirmationEmailAsync(userName, confirmationUrl);
         
-        var message = new EmailMessage
+        EmailMessage message = new EmailMessage
         {
             To = toEmail,
             Subject = "Confirm your email - AI Group Chat",
@@ -51,10 +51,10 @@ public class EmailService : IEmailService
         string resetToken, 
         CancellationToken cancellationToken = default)
     {
-        var resetUrl = BuildUrl(_settings.ResetPasswordPath, resetToken, toEmail);
-        var (html, text) = await _templateService.RenderPasswordResetEmailAsync(userName, resetUrl);
+        string resetUrl = BuildUrl(_settings.ResetPasswordPath, resetToken, toEmail);
+        (string html, string text) = await _templateService.RenderPasswordResetEmailAsync(userName, resetUrl);
         
-        var message = new EmailMessage
+        EmailMessage message = new EmailMessage
         {
             To = toEmail,
             Subject = "Reset your password - AI Group Chat",
@@ -67,8 +67,8 @@ public class EmailService : IEmailService
 
     private string BuildUrl(string path, string token, string email)
     {
-        var encodedToken = HttpUtility.UrlEncode(token);
-        var encodedEmail = HttpUtility.UrlEncode(email);
+        string encodedToken = HttpUtility.UrlEncode(token);
+        string encodedEmail = HttpUtility.UrlEncode(email);
         return $"{_settings.FrontendBaseUrl}{path}?token={encodedToken}&email={encodedEmail}";
     }
 }

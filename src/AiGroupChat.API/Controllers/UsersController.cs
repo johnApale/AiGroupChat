@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using AiGroupChat.Application.DTOs.Users;
 using AiGroupChat.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -20,21 +21,21 @@ public class UsersController : ControllerBase
     [HttpGet("me")]
     public async Task<IActionResult> GetCurrentUser(CancellationToken cancellationToken)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         
         if (string.IsNullOrEmpty(userId))
         {
             return Unauthorized();
         }
 
-        var result = await _userService.GetCurrentUserAsync(userId, cancellationToken);
+        UserResponse result = await _userService.GetCurrentUserAsync(userId, cancellationToken);
         return Ok(result);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(string id, CancellationToken cancellationToken)
     {
-        var result = await _userService.GetByIdAsync(id, cancellationToken);
+        UserResponse result = await _userService.GetByIdAsync(id, cancellationToken);
         return Ok(result);
     }
 }

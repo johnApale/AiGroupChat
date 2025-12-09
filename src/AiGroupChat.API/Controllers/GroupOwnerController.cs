@@ -21,14 +21,14 @@ public class GroupOwnerController : ControllerBase
     [HttpPut]
     public async Task<IActionResult> TransferOwnership(Guid groupId, [FromBody] TransferOwnershipRequest request, CancellationToken cancellationToken)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
         if (string.IsNullOrEmpty(userId))
         {
             return Unauthorized();
         }
 
-        var result = await _groupMemberService.TransferOwnershipAsync(groupId, request, userId, cancellationToken);
+        GroupMemberResponse result = await _groupMemberService.TransferOwnershipAsync(groupId, request, userId, cancellationToken);
         return Ok(result);
     }
 }

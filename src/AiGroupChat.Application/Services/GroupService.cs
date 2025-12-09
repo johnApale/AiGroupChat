@@ -21,12 +21,12 @@ public class GroupService : IGroupService
     public async Task<GroupResponse> CreateAsync(CreateGroupRequest request, string currentUserId, CancellationToken cancellationToken = default)
     {
         // Get default AI provider (first enabled by sort order)
-        var defaultProvider = await _aiProviderRepository.GetDefaultAsync(cancellationToken)
+        AiProvider defaultProvider = await _aiProviderRepository.GetDefaultAsync(cancellationToken)
             ?? throw new ValidationException("No AI providers are available. Please contact an administrator.");
 
-        var now = DateTime.UtcNow;
+        DateTime now = DateTime.UtcNow;
 
-        var group = new Group
+        Group group = new Group
         {
             Id = Guid.NewGuid(),
             Name = request.Name,
@@ -40,7 +40,7 @@ public class GroupService : IGroupService
         await _groupRepository.CreateAsync(group, cancellationToken);
 
         // Add creator as admin
-        var member = new GroupMember
+        GroupMember member = new GroupMember
         {
             Id = Guid.NewGuid(),
             GroupId = group.Id,
@@ -52,26 +52,26 @@ public class GroupService : IGroupService
         await _groupRepository.AddMemberAsync(member, cancellationToken);
 
         // Fetch the group with members to return
-        var createdGroup = await _groupRepository.GetByIdAsync(group.Id, cancellationToken);
+        Group? createdGroup = await _groupRepository.GetByIdAsync(group.Id, cancellationToken);
         return MapToResponse(createdGroup!);
     }
 
     public async Task<List<GroupResponse>> GetMyGroupsAsync(string currentUserId, CancellationToken cancellationToken = default)
     {
-        var groups = await _groupRepository.GetGroupsByUserIdAsync(currentUserId, cancellationToken);
+        List<Group> groups = await _groupRepository.GetGroupsByUserIdAsync(currentUserId, cancellationToken);
         return groups.Select(MapToResponse).ToList();
     }
 
     public async Task<GroupResponse> GetByIdAsync(Guid groupId, string currentUserId, CancellationToken cancellationToken = default)
     {
-        var group = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
+        Group? group = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
 
         if (group == null)
         {
             throw new NotFoundException("Group", groupId);
         }
 
-        var isMember = await _groupRepository.IsMemberAsync(groupId, currentUserId, cancellationToken);
+        bool isMember = await _groupRepository.IsMemberAsync(groupId, currentUserId, cancellationToken);
 
         if (!isMember)
         {
@@ -83,14 +83,14 @@ public class GroupService : IGroupService
 
     public async Task<GroupResponse> UpdateAsync(Guid groupId, UpdateGroupRequest request, string currentUserId, CancellationToken cancellationToken = default)
     {
-        var group = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
+        Group? group = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
 
         if (group == null)
         {
             throw new NotFoundException("Group", groupId);
         }
 
-        var isAdmin = await _groupRepository.IsAdminAsync(groupId, currentUserId, cancellationToken);
+        bool isAdmin = await _groupRepository.IsAdminAsync(groupId, currentUserId, cancellationToken);
 
         if (!isAdmin)
         {
@@ -107,14 +107,14 @@ public class GroupService : IGroupService
 
     public async Task DeleteAsync(Guid groupId, string currentUserId, CancellationToken cancellationToken = default)
     {
-        var group = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
+        Group? group = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
 
         if (group == null)
         {
             throw new NotFoundException("Group", groupId);
         }
 
-        var isOwner = await _groupRepository.IsOwnerAsync(groupId, currentUserId, cancellationToken);
+        bool isOwner = await _groupRepository.IsOwnerAsync(groupId, currentUserId, cancellationToken);
 
         if (!isOwner)
         {
@@ -126,14 +126,14 @@ public class GroupService : IGroupService
 
     public async Task<GroupResponse> UpdateAiSettingsAsync(Guid groupId, UpdateAiSettingsRequest request, string currentUserId, CancellationToken cancellationToken = default)
     {
-        var group = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
+        Group? group = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
 
         if (group == null)
         {
             throw new NotFoundException("Group", groupId);
         }
 
-        var isAdmin = await _groupRepository.IsAdminAsync(groupId, currentUserId, cancellationToken);
+        bool isAdmin = await _groupRepository.IsAdminAsync(groupId, currentUserId, cancellationToken);
 
         if (!isAdmin)
         {
@@ -149,7 +149,7 @@ public class GroupService : IGroupService
         if (request.AiProviderId.HasValue)
         {
             // Validate that the provider exists and is enabled
-            var provider = await _aiProviderRepository.GetByIdAsync(request.AiProviderId.Value, cancellationToken);
+            AiProvider? provider = await _aiProviderRepository.GetByIdAsync(request.AiProviderId.Value, cancellationToken);
             if (provider == null)
             {
                 throw new ValidationException("The specified AI provider does not exist or is not enabled.");

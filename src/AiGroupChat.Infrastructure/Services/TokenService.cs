@@ -25,7 +25,7 @@ public class TokenService : ITokenService
 
     public string GenerateAccessToken(User user)
     {
-        var claims = new List<Claim>
+        List<Claim> claims = new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, user.Id),
             new(ClaimTypes.Email, user.Email ?? string.Empty),
@@ -33,10 +33,10 @@ public class TokenService : ITokenService
             new("display_name", user.DisplayName)
         };
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret));
-        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret));
+        SigningCredentials credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        var token = new JwtSecurityToken(
+        JwtSecurityToken token = new JwtSecurityToken(
             issuer: _jwtSettings.Issuer,
             audience: _jwtSettings.Audience,
             claims: claims,
@@ -49,9 +49,9 @@ public class TokenService : ITokenService
 
     public async Task<string> GenerateRefreshTokenAsync(User user, CancellationToken cancellationToken = default)
     {
-        var token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+        string token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
 
-        var refreshToken = new RefreshToken
+        RefreshToken refreshToken = new RefreshToken
         {
             Id = Guid.NewGuid(),
             UserId = user.Id,
@@ -69,7 +69,7 @@ public class TokenService : ITokenService
 
     public async Task<string?> ValidateRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
     {
-        var token = await _context.RefreshTokens
+        RefreshToken? token = await _context.RefreshTokens
             .FirstOrDefaultAsync(t => 
                 t.Token == refreshToken && 
                 !t.Revoked && 
@@ -81,7 +81,7 @@ public class TokenService : ITokenService
 
     public async Task RevokeRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
     {
-        var token = await _context.RefreshTokens
+        RefreshToken? token = await _context.RefreshTokens
             .FirstOrDefaultAsync(t => t.Token == refreshToken, cancellationToken);
 
         if (token != null)
@@ -93,11 +93,11 @@ public class TokenService : ITokenService
 
     public async Task RevokeAllUserRefreshTokensAsync(string userId, CancellationToken cancellationToken = default)
     {
-        var tokens = await _context.RefreshTokens
+        List<RefreshToken> tokens = await _context.RefreshTokens
             .Where(t => t.UserId == userId && !t.Revoked)
             .ToListAsync(cancellationToken);
 
-        foreach (var token in tokens)
+        foreach (RefreshToken token in tokens)
         {
             token.Revoked = true;
         }

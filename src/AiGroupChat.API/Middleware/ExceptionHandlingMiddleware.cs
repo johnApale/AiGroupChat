@@ -28,7 +28,7 @@ public class ExceptionHandlingMiddleware
 
     private async Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
-        var (statusCode, response) = exception switch
+        (int statusCode, ErrorResponse response) = exception switch
         {
             AuthenticationException ex => (
                 StatusCodes.Status401Unauthorized,
@@ -65,8 +65,8 @@ public class ExceptionHandlingMiddleware
         context.Response.StatusCode = statusCode;
         context.Response.ContentType = "application/json";
 
-        var jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
-        var json = JsonSerializer.Serialize(response, jsonOptions);
+        JsonSerializerOptions jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+        string json = JsonSerializer.Serialize(response, jsonOptions);
 
         await context.Response.WriteAsync(json);
     }

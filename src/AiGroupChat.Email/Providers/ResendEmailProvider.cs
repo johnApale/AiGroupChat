@@ -27,7 +27,7 @@ public class ResendEmailProvider : IEmailProvider
     {
         try
         {
-            var resendMessage = new Resend.EmailMessage
+            Resend.EmailMessage resendMessage = new Resend.EmailMessage
             {
                 From = $"{_settings.FromName} <{_settings.FromEmail}>",
                 To = { message.To },
@@ -36,8 +36,8 @@ public class ResendEmailProvider : IEmailProvider
                 TextBody = message.TextBody
             };
 
-            var response = await _resend.EmailSendAsync(resendMessage, cancellationToken);
-            var emailId = response.Content.ToString();
+            ResendResponse<Guid> response = await _resend.EmailSendAsync(resendMessage, cancellationToken);
+            string emailId = response.Content.ToString();
 
             _logger.LogInformation("Email sent successfully to {Recipient}. EmailId: {EmailId}", 
                 message.To, emailId);

@@ -15,42 +15,42 @@ public class EmailTemplateService : IEmailTemplateService
 
     public async Task<(string Html, string Text)> RenderConfirmationEmailAsync(string userName, string confirmationUrl)
     {
-        var html = await LoadTemplateAsync("ConfirmEmail.html");
+        string html = await LoadTemplateAsync("ConfirmEmail.html");
         
         html = html
             .Replace("{{UserName}}", userName)
             .Replace("{{ConfirmationUrl}}", confirmationUrl);
 
-        var text = GenerateConfirmationTextEmail(userName, confirmationUrl);
+        string text = GenerateConfirmationTextEmail(userName, confirmationUrl);
 
         return (html, text);
     }
 
     public async Task<(string Html, string Text)> RenderPasswordResetEmailAsync(string userName, string resetUrl)
     {
-        var html = await LoadTemplateAsync("PasswordReset.html");
+        string html = await LoadTemplateAsync("PasswordReset.html");
         
         html = html
             .Replace("{{UserName}}", userName)
             .Replace("{{ResetUrl}}", resetUrl);
 
-        var text = GeneratePasswordResetTextEmail(userName, resetUrl);
+        string text = GeneratePasswordResetTextEmail(userName, resetUrl);
 
         return (html, text);
     }
 
     private async Task<string> LoadTemplateAsync(string templateName)
     {
-        var resourceName = $"{_baseNamespace}.{templateName}";
+        string resourceName = $"{_baseNamespace}.{templateName}";
         
-        using var stream = _assembly.GetManifestResourceStream(resourceName);
+        using Stream? stream = _assembly.GetManifestResourceStream(resourceName);
         
         if (stream == null)
         {
             throw new FileNotFoundException($"Email template '{templateName}' not found. Resource name: {resourceName}");
         }
 
-        using var reader = new StreamReader(stream);
+        using StreamReader reader = new StreamReader(stream);
         return await reader.ReadToEndAsync();
     }
 

@@ -21,49 +21,49 @@ public class GroupMembersController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> AddMember(Guid groupId, [FromBody] AddMemberRequest request, CancellationToken cancellationToken)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
         if (string.IsNullOrEmpty(userId))
         {
             return Unauthorized();
         }
 
-        var result = await _groupMemberService.AddMemberAsync(groupId, request, userId, cancellationToken);
+        GroupMemberResponse result = await _groupMemberService.AddMemberAsync(groupId, request, userId, cancellationToken);
         return StatusCode(201, result);
     }
 
     [HttpGet]
     public async Task<IActionResult> GetMembers(Guid groupId, CancellationToken cancellationToken)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
         if (string.IsNullOrEmpty(userId))
         {
             return Unauthorized();
         }
 
-        var result = await _groupMemberService.GetMembersAsync(groupId, userId, cancellationToken);
+        List<GroupMemberResponse> result = await _groupMemberService.GetMembersAsync(groupId, userId, cancellationToken);
         return Ok(result);
     }
 
     [HttpPut("{memberId}")]
     public async Task<IActionResult> UpdateMemberRole(Guid groupId, string memberId, [FromBody] UpdateMemberRoleRequest request, CancellationToken cancellationToken)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
         if (string.IsNullOrEmpty(userId))
         {
             return Unauthorized();
         }
 
-        var result = await _groupMemberService.UpdateMemberRoleAsync(groupId, memberId, request, userId, cancellationToken);
+        GroupMemberResponse result = await _groupMemberService.UpdateMemberRoleAsync(groupId, memberId, request, userId, cancellationToken);
         return Ok(result);
     }
 
     [HttpDelete("{memberId}")]
     public async Task<IActionResult> RemoveMember(Guid groupId, string memberId, CancellationToken cancellationToken)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
         if (string.IsNullOrEmpty(userId))
         {
@@ -77,7 +77,7 @@ public class GroupMembersController : ControllerBase
     [HttpDelete("me")]
     public async Task<IActionResult> LeaveGroup(Guid groupId, CancellationToken cancellationToken)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
         if (string.IsNullOrEmpty(userId))
         {

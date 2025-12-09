@@ -1,3 +1,4 @@
+using AiGroupChat.Application.DTOs.AiProviders;
 using AiGroupChat.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,14 +20,14 @@ public class AiProvidersController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
-        var providers = await _aiProviderService.GetAllAsync(cancellationToken);
+        List<AiProviderResponse> providers = await _aiProviderService.GetAllAsync(cancellationToken);
         return Ok(providers);
     }
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
     {
-        var provider = await _aiProviderService.GetByIdAsync(id, cancellationToken);
+        AiProviderResponse provider = await _aiProviderService.GetByIdAsync(id, cancellationToken);
         return Ok(provider);
     }
 }

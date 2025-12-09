@@ -20,35 +20,35 @@ public class GroupMemberService : IGroupMemberService
     public async Task<GroupMemberResponse> AddMemberAsync(Guid groupId, AddMemberRequest request, string currentUserId, CancellationToken cancellationToken = default)
     {
         // Verify group exists
-        var group = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
+        Group? group = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
         if (group == null)
         {
             throw new NotFoundException("Group", groupId);
         }
 
         // Verify current user is admin or owner
-        var isAdmin = await _groupRepository.IsAdminAsync(groupId, currentUserId, cancellationToken);
+        bool isAdmin = await _groupRepository.IsAdminAsync(groupId, currentUserId, cancellationToken);
         if (!isAdmin)
         {
             throw new AuthorizationException("Only group owners and admins can add members.");
         }
 
         // Verify target user exists
-        var targetUser = await _userRepository.FindByIdAsync(request.UserId, cancellationToken);
+        User? targetUser = await _userRepository.FindByIdAsync(request.UserId, cancellationToken);
         if (targetUser == null)
         {
             throw new NotFoundException("User", request.UserId);
         }
 
         // Check if user is already a member
-        var existingMember = await _groupRepository.GetMemberAsync(groupId, request.UserId, cancellationToken);
+        GroupMember? existingMember = await _groupRepository.GetMemberAsync(groupId, request.UserId, cancellationToken);
         if (existingMember != null)
         {
             throw new ValidationException("User is already a member of this group.");
         }
 
         // Add member
-        var member = new GroupMember
+        GroupMember member = new GroupMember
         {
             Id = Guid.NewGuid(),
             GroupId = groupId,
@@ -60,21 +60,21 @@ public class GroupMemberService : IGroupMemberService
         await _groupRepository.AddMemberAsync(member, cancellationToken);
 
         // Fetch the member with user data
-        var addedMember = await _groupRepository.GetMemberAsync(groupId, request.UserId, cancellationToken);
+        GroupMember? addedMember = await _groupRepository.GetMemberAsync(groupId, request.UserId, cancellationToken);
         return MapToResponse(addedMember!);
     }
 
     public async Task<List<GroupMemberResponse>> GetMembersAsync(Guid groupId, string currentUserId, CancellationToken cancellationToken = default)
     {
         // Verify group exists
-        var group = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
+        Group? group = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
         if (group == null)
         {
             throw new NotFoundException("Group", groupId);
         }
 
         // Verify current user is a member
-        var isMember = await _groupRepository.IsMemberAsync(groupId, currentUserId, cancellationToken);
+        bool isMember = await _groupRepository.IsMemberAsync(groupId, currentUserId, cancellationToken);
         if (!isMember)
         {
             throw new AuthorizationException("You are not a member of this group.");
@@ -86,21 +86,21 @@ public class GroupMemberService : IGroupMemberService
     public async Task<GroupMemberResponse> UpdateMemberRoleAsync(Guid groupId, string userId, UpdateMemberRoleRequest request, string currentUserId, CancellationToken cancellationToken = default)
     {
         // Verify group exists
-        var group = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
+        Group? group = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
         if (group == null)
         {
             throw new NotFoundException("Group", groupId);
         }
 
         // Verify current user is owner
-        var isOwner = await _groupRepository.IsOwnerAsync(groupId, currentUserId, cancellationToken);
+        bool isOwner = await _groupRepository.IsOwnerAsync(groupId, currentUserId, cancellationToken);
         if (!isOwner)
         {
             throw new AuthorizationException("Only the group owner can change member roles.");
         }
 
         // Verify target member exists
-        var member = await _groupRepository.GetMemberAsync(groupId, userId, cancellationToken);
+        GroupMember? member = await _groupRepository.GetMemberAsync(groupId, userId, cancellationToken);
         if (member == null)
         {
             throw new NotFoundException("Member", userId);
@@ -113,7 +113,7 @@ public class GroupMemberService : IGroupMemberService
         }
 
         // Parse and validate role
-        if (!Enum.TryParse<GroupRole>(request.Role, true, out var newRole) || newRole == GroupRole.Owner)
+        if (!Enum.TryParse<GroupRole>(request.Role, true, out GroupRole newRole) || newRole == GroupRole.Owner)
         {
             throw new ValidationException("Invalid role. Must be 'Admin' or 'Member'.");
         }
@@ -127,14 +127,14 @@ public class GroupMemberService : IGroupMemberService
     public async Task RemoveMemberAsync(Guid groupId, string userId, string currentUserId, CancellationToken cancellationToken = default)
     {
         // Verify group exists
-        var group = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
+        Group? group = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
         if (group == null)
         {
             throw new NotFoundException("Group", groupId);
         }
 
         // Verify target member exists
-        var member = await _groupRepository.GetMemberAsync(groupId, userId, cancellationToken);
+        GroupMember? member = await _groupRepository.GetMemberAsync(groupId, userId, cancellationToken);
         if (member == null)
         {
             throw new NotFoundException("Member", userId);
@@ -147,8 +147,8 @@ public class GroupMemberService : IGroupMemberService
         }
 
         // Check authorization
-        var isOwner = await _groupRepository.IsOwnerAsync(groupId, currentUserId, cancellationToken);
-        var isAdmin = await _groupRepository.IsAdminAsync(groupId, currentUserId, cancellationToken);
+        bool isOwner = await _groupRepository.IsOwnerAsync(groupId, currentUserId, cancellationToken);
+        bool isAdmin = await _groupRepository.IsAdminAsync(groupId, currentUserId, cancellationToken);
 
         if (!isAdmin)
         {
@@ -167,14 +167,14 @@ public class GroupMemberService : IGroupMemberService
     public async Task LeaveGroupAsync(Guid groupId, string currentUserId, CancellationToken cancellationToken = default)
     {
         // Verify group exists
-        var group = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
+        Group? group = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
         if (group == null)
         {
             throw new NotFoundException("Group", groupId);
         }
 
         // Verify current user is a member
-        var member = await _groupRepository.GetMemberAsync(groupId, currentUserId, cancellationToken);
+        GroupMember? member = await _groupRepository.GetMemberAsync(groupId, currentUserId, cancellationToken);
         if (member == null)
         {
             throw new AuthorizationException("You are not a member of this group.");
@@ -192,21 +192,21 @@ public class GroupMemberService : IGroupMemberService
     public async Task<GroupMemberResponse> TransferOwnershipAsync(Guid groupId, TransferOwnershipRequest request, string currentUserId, CancellationToken cancellationToken = default)
     {
         // Verify group exists
-        var group = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
+        Group? group = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
         if (group == null)
         {
             throw new NotFoundException("Group", groupId);
         }
 
         // Verify current user is owner
-        var currentMember = await _groupRepository.GetMemberAsync(groupId, currentUserId, cancellationToken);
+        GroupMember? currentMember = await _groupRepository.GetMemberAsync(groupId, currentUserId, cancellationToken);
         if (currentMember == null || currentMember.Role != GroupRole.Owner)
         {
             throw new AuthorizationException("Only the group owner can transfer ownership.");
         }
 
         // Verify new owner is a member
-        var newOwnerMember = await _groupRepository.GetMemberAsync(groupId, request.NewOwnerUserId, cancellationToken);
+        GroupMember? newOwnerMember = await _groupRepository.GetMemberAsync(groupId, request.NewOwnerUserId, cancellationToken);
         if (newOwnerMember == null)
         {
             throw new NotFoundException("Member", request.NewOwnerUserId);
@@ -226,7 +226,7 @@ public class GroupMemberService : IGroupMemberService
         await _groupRepository.UpdateMemberAsync(newOwnerMember, cancellationToken);
 
         // Return the new owner's member info
-        var updatedNewOwner = await _groupRepository.GetMemberAsync(groupId, request.NewOwnerUserId, cancellationToken);
+        GroupMember? updatedNewOwner = await _groupRepository.GetMemberAsync(groupId, request.NewOwnerUserId, cancellationToken);
         return MapToResponse(updatedNewOwner!);
     }
 
