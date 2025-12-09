@@ -35,7 +35,7 @@ public class UpdateAiSettingsAsyncTests : GroupServiceTestBase
     public async Task WithValidRequest_UpdatesAiMonitoringEnabled()
     {
         // Arrange
-        var request = new UpdateAiSettingsRequest { AiMonitoringEnabled = true };
+        UpdateAiSettingsRequest request = new UpdateAiSettingsRequest { AiMonitoringEnabled = true };
 
         GroupRepositoryMock
             .Setup(x => x.GetByIdAsync(_groupId, It.IsAny<CancellationToken>()))
@@ -46,7 +46,7 @@ public class UpdateAiSettingsAsyncTests : GroupServiceTestBase
             .ReturnsAsync(true);
 
         // Act
-        var result = await GroupService.UpdateAiSettingsAsync(_groupId, request, _userId);
+        GroupResponse result = await GroupService.UpdateAiSettingsAsync(_groupId, request, _userId);
 
         // Assert
         Assert.True(result.AiMonitoringEnabled);
@@ -57,7 +57,7 @@ public class UpdateAiSettingsAsyncTests : GroupServiceTestBase
     public async Task WithValidRequest_UpdatesAiProviderId()
     {
         // Arrange
-        var newProvider = new AiProvider
+        AiProvider newProvider = new AiProvider
         {
             Id = Guid.NewGuid(),
             Name = "claude",
@@ -69,7 +69,7 @@ public class UpdateAiSettingsAsyncTests : GroupServiceTestBase
             MaxTokensLimit = 200000
         };
 
-        var request = new UpdateAiSettingsRequest { AiProviderId = newProvider.Id };
+        UpdateAiSettingsRequest request = new UpdateAiSettingsRequest { AiProviderId = newProvider.Id };
 
         GroupRepositoryMock
             .Setup(x => x.GetByIdAsync(_groupId, It.IsAny<CancellationToken>()))
@@ -84,7 +84,7 @@ public class UpdateAiSettingsAsyncTests : GroupServiceTestBase
             .ReturnsAsync(newProvider);
 
         // Act
-        var result = await GroupService.UpdateAiSettingsAsync(_groupId, request, _userId);
+        GroupResponse result = await GroupService.UpdateAiSettingsAsync(_groupId, request, _userId);
 
         // Assert
         Assert.Equal(newProvider.Id, result.AiProviderId);
@@ -95,7 +95,7 @@ public class UpdateAiSettingsAsyncTests : GroupServiceTestBase
     public async Task WithBothFields_UpdatesBoth()
     {
         // Arrange
-        var newProvider = new AiProvider
+        AiProvider newProvider = new AiProvider
         {
             Id = Guid.NewGuid(),
             Name = "openai",
@@ -107,7 +107,7 @@ public class UpdateAiSettingsAsyncTests : GroupServiceTestBase
             MaxTokensLimit = 128000
         };
 
-        var request = new UpdateAiSettingsRequest
+        UpdateAiSettingsRequest request = new UpdateAiSettingsRequest
         {
             AiMonitoringEnabled = true,
             AiProviderId = newProvider.Id
@@ -126,7 +126,7 @@ public class UpdateAiSettingsAsyncTests : GroupServiceTestBase
             .ReturnsAsync(newProvider);
 
         // Act
-        var result = await GroupService.UpdateAiSettingsAsync(_groupId, request, _userId);
+        GroupResponse result = await GroupService.UpdateAiSettingsAsync(_groupId, request, _userId);
 
         // Assert
         Assert.True(result.AiMonitoringEnabled);
@@ -137,7 +137,7 @@ public class UpdateAiSettingsAsyncTests : GroupServiceTestBase
     public async Task WithNonexistentGroup_ThrowsNotFoundException()
     {
         // Arrange
-        var request = new UpdateAiSettingsRequest { AiMonitoringEnabled = true };
+        UpdateAiSettingsRequest request = new UpdateAiSettingsRequest { AiMonitoringEnabled = true };
 
         GroupRepositoryMock
             .Setup(x => x.GetByIdAsync(_groupId, It.IsAny<CancellationToken>()))
@@ -152,7 +152,7 @@ public class UpdateAiSettingsAsyncTests : GroupServiceTestBase
     public async Task WithNonAdminUser_ThrowsAuthorizationException()
     {
         // Arrange
-        var request = new UpdateAiSettingsRequest { AiMonitoringEnabled = true };
+        UpdateAiSettingsRequest request = new UpdateAiSettingsRequest { AiMonitoringEnabled = true };
 
         GroupRepositoryMock
             .Setup(x => x.GetByIdAsync(_groupId, It.IsAny<CancellationToken>()))
@@ -171,8 +171,8 @@ public class UpdateAiSettingsAsyncTests : GroupServiceTestBase
     public async Task WithInvalidProviderId_ThrowsValidationException()
     {
         // Arrange
-        var invalidProviderId = Guid.NewGuid();
-        var request = new UpdateAiSettingsRequest { AiProviderId = invalidProviderId };
+        Guid invalidProviderId = Guid.NewGuid();
+        UpdateAiSettingsRequest request = new UpdateAiSettingsRequest { AiProviderId = invalidProviderId };
 
         GroupRepositoryMock
             .Setup(x => x.GetByIdAsync(_groupId, It.IsAny<CancellationToken>()))
@@ -195,9 +195,9 @@ public class UpdateAiSettingsAsyncTests : GroupServiceTestBase
     public async Task WithEmptyRequest_DoesNotChangeValues()
     {
         // Arrange
-        var originalMonitoring = _existingGroup.AiMonitoringEnabled;
-        var originalProviderId = _existingGroup.AiProviderId;
-        var request = new UpdateAiSettingsRequest(); // Both null
+        bool originalMonitoring = _existingGroup.AiMonitoringEnabled;
+        Guid? originalProviderId = _existingGroup.AiProviderId;
+        UpdateAiSettingsRequest request = new UpdateAiSettingsRequest(); // Both null
 
         GroupRepositoryMock
             .Setup(x => x.GetByIdAsync(_groupId, It.IsAny<CancellationToken>()))
@@ -208,7 +208,7 @@ public class UpdateAiSettingsAsyncTests : GroupServiceTestBase
             .ReturnsAsync(true);
 
         // Act
-        var result = await GroupService.UpdateAiSettingsAsync(_groupId, request, _userId);
+        GroupResponse result = await GroupService.UpdateAiSettingsAsync(_groupId, request, _userId);
 
         // Assert
         Assert.Equal(originalMonitoring, result.AiMonitoringEnabled);

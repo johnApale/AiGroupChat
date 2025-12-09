@@ -11,11 +11,11 @@ public class LeaveGroupAsyncTests : GroupMemberServiceTestBase
     public async Task WithMember_LeavesGroup()
     {
         // Arrange
-        var groupId = Guid.NewGuid();
-        var memberId = "member-id";
+        Guid groupId = Guid.NewGuid();
+        string memberId = "member-id";
 
-        var group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
-        var member = new GroupMember
+        Group group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
+        GroupMember member = new GroupMember
         {
             UserId = memberId,
             Role = GroupRole.Member,
@@ -47,11 +47,11 @@ public class LeaveGroupAsyncTests : GroupMemberServiceTestBase
     public async Task WithAdmin_LeavesGroup()
     {
         // Arrange
-        var groupId = Guid.NewGuid();
-        var adminId = "admin-id";
+        Guid groupId = Guid.NewGuid();
+        string adminId = "admin-id";
 
-        var group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
-        var admin = new GroupMember
+        Group group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
+        GroupMember admin = new GroupMember
         {
             UserId = adminId,
             Role = GroupRole.Admin,
@@ -83,11 +83,11 @@ public class LeaveGroupAsyncTests : GroupMemberServiceTestBase
     public async Task WithOwner_ThrowsValidationException()
     {
         // Arrange
-        var groupId = Guid.NewGuid();
-        var ownerId = "owner-id";
+        Guid groupId = Guid.NewGuid();
+        string ownerId = "owner-id";
 
-        var group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
-        var owner = new GroupMember
+        Group group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
+        GroupMember owner = new GroupMember
         {
             UserId = ownerId,
             Role = GroupRole.Owner,
@@ -103,7 +103,7 @@ public class LeaveGroupAsyncTests : GroupMemberServiceTestBase
             .ReturnsAsync(owner);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<ValidationException>(
+        ValidationException exception = await Assert.ThrowsAsync<ValidationException>(
             () => GroupMemberService.LeaveGroupAsync(groupId, ownerId)
         );
 
@@ -114,10 +114,10 @@ public class LeaveGroupAsyncTests : GroupMemberServiceTestBase
     public async Task WithNonMember_ThrowsAuthorizationException()
     {
         // Arrange
-        var groupId = Guid.NewGuid();
-        var userId = "non-member-id";
+        Guid groupId = Guid.NewGuid();
+        string userId = "non-member-id";
 
-        var group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
+        Group group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
 
         GroupRepositoryMock
             .Setup(x => x.GetByIdAsync(groupId, It.IsAny<CancellationToken>()))
@@ -128,7 +128,7 @@ public class LeaveGroupAsyncTests : GroupMemberServiceTestBase
             .ReturnsAsync((GroupMember?)null);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<AuthorizationException>(
+        AuthorizationException exception = await Assert.ThrowsAsync<AuthorizationException>(
             () => GroupMemberService.LeaveGroupAsync(groupId, userId)
         );
 
@@ -139,15 +139,15 @@ public class LeaveGroupAsyncTests : GroupMemberServiceTestBase
     public async Task WithNonexistentGroup_ThrowsNotFoundException()
     {
         // Arrange
-        var groupId = Guid.NewGuid();
-        var userId = "user-id";
+        Guid groupId = Guid.NewGuid();
+        string userId = "user-id";
 
         GroupRepositoryMock
             .Setup(x => x.GetByIdAsync(groupId, It.IsAny<CancellationToken>()))
             .ReturnsAsync((Group?)null);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<NotFoundException>(
+        NotFoundException exception = await Assert.ThrowsAsync<NotFoundException>(
             () => GroupMemberService.LeaveGroupAsync(groupId, userId)
         );
 

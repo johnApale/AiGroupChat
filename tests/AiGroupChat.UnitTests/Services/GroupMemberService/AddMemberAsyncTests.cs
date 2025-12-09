@@ -12,19 +12,19 @@ public class AddMemberAsyncTests : GroupMemberServiceTestBase
     public async Task WithValidRequest_AddsMemberAndReturnsResponse()
     {
         // Arrange
-        var groupId = Guid.NewGuid();
-        var currentUserId = "owner-id";
-        var newUserId = "new-user-id";
-        var request = new AddMemberRequest { UserId = newUserId };
+        Guid groupId = Guid.NewGuid();
+        string currentUserId = "owner-id";
+        string newUserId = "new-user-id";
+        AddMemberRequest request = new AddMemberRequest { UserId = newUserId };
 
-        var group = new Group
+        Group group = new Group
         {
             Id = groupId,
             Name = "Test Group",
             Members = new List<GroupMember>()
         };
 
-        var newUser = new User
+        User newUser = new User
         {
             Id = newUserId,
             UserName = "newuser",
@@ -63,7 +63,7 @@ public class AddMemberAsyncTests : GroupMemberServiceTestBase
             });
 
         // Act
-        var result = await GroupMemberService.AddMemberAsync(groupId, request, currentUserId);
+        GroupMemberResponse result = await GroupMemberService.AddMemberAsync(groupId, request, currentUserId);
 
         // Assert
         Assert.NotNull(result);
@@ -75,15 +75,15 @@ public class AddMemberAsyncTests : GroupMemberServiceTestBase
     public async Task WithNonexistentGroup_ThrowsNotFoundException()
     {
         // Arrange
-        var groupId = Guid.NewGuid();
-        var request = new AddMemberRequest { UserId = "new-user-id" };
+        Guid groupId = Guid.NewGuid();
+        AddMemberRequest request = new AddMemberRequest { UserId = "new-user-id" };
 
         GroupRepositoryMock
             .Setup(x => x.GetByIdAsync(groupId, It.IsAny<CancellationToken>()))
             .ReturnsAsync((Group?)null);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<NotFoundException>(
+        NotFoundException exception = await Assert.ThrowsAsync<NotFoundException>(
             () => GroupMemberService.AddMemberAsync(groupId, request, "current-user")
         );
 
@@ -94,10 +94,10 @@ public class AddMemberAsyncTests : GroupMemberServiceTestBase
     public async Task WithNonAdmin_ThrowsAuthorizationException()
     {
         // Arrange
-        var groupId = Guid.NewGuid();
-        var request = new AddMemberRequest { UserId = "new-user-id" };
+        Guid groupId = Guid.NewGuid();
+        AddMemberRequest request = new AddMemberRequest { UserId = "new-user-id" };
 
-        var group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
+        Group group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
 
         GroupRepositoryMock
             .Setup(x => x.GetByIdAsync(groupId, It.IsAny<CancellationToken>()))
@@ -108,7 +108,7 @@ public class AddMemberAsyncTests : GroupMemberServiceTestBase
             .ReturnsAsync(false);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<AuthorizationException>(
+        AuthorizationException exception = await Assert.ThrowsAsync<AuthorizationException>(
             () => GroupMemberService.AddMemberAsync(groupId, request, "current-user")
         );
 
@@ -119,11 +119,11 @@ public class AddMemberAsyncTests : GroupMemberServiceTestBase
     public async Task WithNonexistentUser_ThrowsNotFoundException()
     {
         // Arrange
-        var groupId = Guid.NewGuid();
-        var newUserId = "nonexistent-user";
-        var request = new AddMemberRequest { UserId = newUserId };
+        Guid groupId = Guid.NewGuid();
+        string newUserId = "nonexistent-user";
+        AddMemberRequest request = new AddMemberRequest { UserId = newUserId };
 
-        var group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
+        Group group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
 
         GroupRepositoryMock
             .Setup(x => x.GetByIdAsync(groupId, It.IsAny<CancellationToken>()))
@@ -138,7 +138,7 @@ public class AddMemberAsyncTests : GroupMemberServiceTestBase
             .ReturnsAsync((User?)null);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<NotFoundException>(
+        NotFoundException exception = await Assert.ThrowsAsync<NotFoundException>(
             () => GroupMemberService.AddMemberAsync(groupId, request, "current-user")
         );
 
@@ -149,13 +149,13 @@ public class AddMemberAsyncTests : GroupMemberServiceTestBase
     public async Task WithExistingMember_ThrowsValidationException()
     {
         // Arrange
-        var groupId = Guid.NewGuid();
-        var existingUserId = "existing-user";
-        var request = new AddMemberRequest { UserId = existingUserId };
+        Guid groupId = Guid.NewGuid();
+        string existingUserId = "existing-user";
+        AddMemberRequest request = new AddMemberRequest { UserId = existingUserId };
 
-        var group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
-        var existingUser = new User { Id = existingUserId, UserName = "existing" };
-        var existingMember = new GroupMember { UserId = existingUserId, User = existingUser };
+        Group group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
+        User existingUser = new User { Id = existingUserId, UserName = "existing" };
+        GroupMember existingMember = new GroupMember { UserId = existingUserId, User = existingUser };
 
         GroupRepositoryMock
             .Setup(x => x.GetByIdAsync(groupId, It.IsAny<CancellationToken>()))
@@ -174,7 +174,7 @@ public class AddMemberAsyncTests : GroupMemberServiceTestBase
             .ReturnsAsync(existingMember);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<ValidationException>(
+        ValidationException exception = await Assert.ThrowsAsync<ValidationException>(
             () => GroupMemberService.AddMemberAsync(groupId, request, "current-user")
         );
 

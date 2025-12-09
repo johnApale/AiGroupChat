@@ -11,12 +11,12 @@ public class ResendConfirmationAsyncTests : AuthServiceTestBase
     public async Task WithUnconfirmedUser_SendsEmailAndReturnsMessage()
     {
         // Arrange
-        var request = new ResendConfirmationRequest
+        ResendConfirmationRequest request = new ResendConfirmationRequest
         {
             Email = "test@example.com"
         };
 
-        var user = new User
+        User user = new User
         {
             Id = "user-id-123",
             Email = request.Email,
@@ -44,7 +44,7 @@ public class ResendConfirmationAsyncTests : AuthServiceTestBase
             .ReturnsAsync(EmailResult.Success("email-id"));
 
         // Act
-        var result = await AuthService.ResendConfirmationAsync(request);
+        MessageResponse result = await AuthService.ResendConfirmationAsync(request);
 
         // Assert
         Assert.NotNull(result);
@@ -63,12 +63,12 @@ public class ResendConfirmationAsyncTests : AuthServiceTestBase
     public async Task WithAlreadyConfirmedUser_DoesNotSendEmail()
     {
         // Arrange
-        var request = new ResendConfirmationRequest
+        ResendConfirmationRequest request = new ResendConfirmationRequest
         {
             Email = "test@example.com"
         };
 
-        var user = new User
+        User user = new User
         {
             Id = "user-id-123",
             Email = request.Email,
@@ -84,7 +84,7 @@ public class ResendConfirmationAsyncTests : AuthServiceTestBase
             .ReturnsAsync(true);
 
         // Act
-        var result = await AuthService.ResendConfirmationAsync(request);
+        MessageResponse result = await AuthService.ResendConfirmationAsync(request);
 
         // Assert
         Assert.NotNull(result);
@@ -103,7 +103,7 @@ public class ResendConfirmationAsyncTests : AuthServiceTestBase
     public async Task WithNonexistentEmail_ReturnsSuccessToPreventEnumeration()
     {
         // Arrange
-        var request = new ResendConfirmationRequest
+        ResendConfirmationRequest request = new ResendConfirmationRequest
         {
             Email = "nonexistent@example.com"
         };
@@ -113,7 +113,7 @@ public class ResendConfirmationAsyncTests : AuthServiceTestBase
             .ReturnsAsync((User?)null);
 
         // Act
-        var result = await AuthService.ResendConfirmationAsync(request);
+        MessageResponse result = await AuthService.ResendConfirmationAsync(request);
 
         // Assert
         Assert.NotNull(result);

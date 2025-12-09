@@ -1,3 +1,4 @@
+using AiGroupChat.Application.DTOs.Groups;
 using AiGroupChat.Application.Exceptions;
 using AiGroupChat.Domain.Entities;
 using AiGroupChat.Domain.Enums;
@@ -11,10 +12,10 @@ public class GetMembersAsyncTests : GroupMemberServiceTestBase
     public async Task WithValidMember_ReturnsMembers()
     {
         // Arrange
-        var groupId = Guid.NewGuid();
-        var currentUserId = "member-id";
+        Guid groupId = Guid.NewGuid();
+        string currentUserId = "member-id";
 
-        var group = new Group
+        Group group = new Group
         {
             Id = groupId,
             Name = "Test Group",
@@ -53,7 +54,7 @@ public class GetMembersAsyncTests : GroupMemberServiceTestBase
             .ReturnsAsync(true);
 
         // Act
-        var result = await GroupMemberService.GetMembersAsync(groupId, currentUserId);
+        List<GroupMemberResponse> result = await GroupMemberService.GetMembersAsync(groupId, currentUserId);
 
         // Assert
         Assert.NotNull(result);
@@ -67,10 +68,10 @@ public class GetMembersAsyncTests : GroupMemberServiceTestBase
     public async Task WithNonMember_ThrowsAuthorizationException()
     {
         // Arrange
-        var groupId = Guid.NewGuid();
-        var nonMemberId = "non-member-id";
+        Guid groupId = Guid.NewGuid();
+        string nonMemberId = "non-member-id";
 
-        var group = new Group
+        Group group = new Group
         {
             Id = groupId,
             Name = "Test Group",
@@ -86,7 +87,7 @@ public class GetMembersAsyncTests : GroupMemberServiceTestBase
             .ReturnsAsync(false);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<AuthorizationException>(
+        AuthorizationException exception = await Assert.ThrowsAsync<AuthorizationException>(
             () => GroupMemberService.GetMembersAsync(groupId, nonMemberId)
         );
 
@@ -97,15 +98,15 @@ public class GetMembersAsyncTests : GroupMemberServiceTestBase
     public async Task WithNonexistentGroup_ThrowsNotFoundException()
     {
         // Arrange
-        var groupId = Guid.NewGuid();
-        var userId = "user-id";
+        Guid groupId = Guid.NewGuid();
+        string userId = "user-id";
 
         GroupRepositoryMock
             .Setup(x => x.GetByIdAsync(groupId, It.IsAny<CancellationToken>()))
             .ReturnsAsync((Group?)null);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<NotFoundException>(
+        NotFoundException exception = await Assert.ThrowsAsync<NotFoundException>(
             () => GroupMemberService.GetMembersAsync(groupId, userId)
         );
 

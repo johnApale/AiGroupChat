@@ -11,12 +11,12 @@ public class RemoveMemberAsyncTests : GroupMemberServiceTestBase
     public async Task WithOwnerRemovingMember_RemovesMember()
     {
         // Arrange
-        var groupId = Guid.NewGuid();
-        var ownerId = "owner-id";
-        var memberId = "member-id";
+        Guid groupId = Guid.NewGuid();
+        string ownerId = "owner-id";
+        string memberId = "member-id";
 
-        var group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
-        var member = new GroupMember
+        Group group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
+        GroupMember member = new GroupMember
         {
             UserId = memberId,
             Role = GroupRole.Member,
@@ -56,12 +56,12 @@ public class RemoveMemberAsyncTests : GroupMemberServiceTestBase
     public async Task WithOwnerRemovingAdmin_RemovesAdmin()
     {
         // Arrange
-        var groupId = Guid.NewGuid();
-        var ownerId = "owner-id";
-        var adminId = "admin-id";
+        Guid groupId = Guid.NewGuid();
+        string ownerId = "owner-id";
+        string adminId = "admin-id";
 
-        var group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
-        var admin = new GroupMember
+        Group group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
+        GroupMember admin = new GroupMember
         {
             UserId = adminId,
             Role = GroupRole.Admin,
@@ -101,12 +101,12 @@ public class RemoveMemberAsyncTests : GroupMemberServiceTestBase
     public async Task WithAdminRemovingMember_RemovesMember()
     {
         // Arrange
-        var groupId = Guid.NewGuid();
-        var adminId = "admin-id";
-        var memberId = "member-id";
+        Guid groupId = Guid.NewGuid();
+        string adminId = "admin-id";
+        string memberId = "member-id";
 
-        var group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
-        var member = new GroupMember
+        Group group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
+        GroupMember member = new GroupMember
         {
             UserId = memberId,
             Role = GroupRole.Member,
@@ -146,12 +146,12 @@ public class RemoveMemberAsyncTests : GroupMemberServiceTestBase
     public async Task WithAdminRemovingAdmin_ThrowsAuthorizationException()
     {
         // Arrange
-        var groupId = Guid.NewGuid();
-        var adminId = "admin-id";
-        var otherAdminId = "other-admin-id";
+        Guid groupId = Guid.NewGuid();
+        string adminId = "admin-id";
+        string otherAdminId = "other-admin-id";
 
-        var group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
-        var otherAdmin = new GroupMember
+        Group group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
+        GroupMember otherAdmin = new GroupMember
         {
             UserId = otherAdminId,
             Role = GroupRole.Admin,
@@ -175,7 +175,7 @@ public class RemoveMemberAsyncTests : GroupMemberServiceTestBase
             .ReturnsAsync(true);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<AuthorizationException>(
+        AuthorizationException exception = await Assert.ThrowsAsync<AuthorizationException>(
             () => GroupMemberService.RemoveMemberAsync(groupId, otherAdminId, adminId)
         );
 
@@ -186,12 +186,12 @@ public class RemoveMemberAsyncTests : GroupMemberServiceTestBase
     public async Task WithRemovingOwner_ThrowsValidationException()
     {
         // Arrange
-        var groupId = Guid.NewGuid();
-        var ownerId = "owner-id";
-        var adminId = "admin-id";
+        Guid groupId = Guid.NewGuid();
+        string ownerId = "owner-id";
+        string adminId = "admin-id";
 
-        var group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
-        var owner = new GroupMember
+        Group group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
+        GroupMember owner = new GroupMember
         {
             UserId = ownerId,
             Role = GroupRole.Owner,
@@ -207,7 +207,7 @@ public class RemoveMemberAsyncTests : GroupMemberServiceTestBase
             .ReturnsAsync(owner);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<ValidationException>(
+        ValidationException exception = await Assert.ThrowsAsync<ValidationException>(
             () => GroupMemberService.RemoveMemberAsync(groupId, ownerId, adminId)
         );
 
@@ -218,12 +218,12 @@ public class RemoveMemberAsyncTests : GroupMemberServiceTestBase
     public async Task WithNonAdmin_ThrowsAuthorizationException()
     {
         // Arrange
-        var groupId = Guid.NewGuid();
-        var memberId = "member-id";
-        var otherMemberId = "other-member-id";
+        Guid groupId = Guid.NewGuid();
+        string memberId = "member-id";
+        string otherMemberId = "other-member-id";
 
-        var group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
-        var otherMember = new GroupMember
+        Group group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
+        GroupMember otherMember = new GroupMember
         {
             UserId = otherMemberId,
             Role = GroupRole.Member,
@@ -247,7 +247,7 @@ public class RemoveMemberAsyncTests : GroupMemberServiceTestBase
             .ReturnsAsync(false);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<AuthorizationException>(
+        AuthorizationException exception = await Assert.ThrowsAsync<AuthorizationException>(
             () => GroupMemberService.RemoveMemberAsync(groupId, otherMemberId, memberId)
         );
 

@@ -1,3 +1,4 @@
+using AiGroupChat.Application.DTOs.Groups;
 using AiGroupChat.Domain.Entities;
 using AiGroupChat.Domain.Enums;
 using Moq;
@@ -10,8 +11,8 @@ public class GetMyGroupsAsyncTests : GroupServiceTestBase
     public async Task WithGroups_ReturnsGroupList()
     {
         // Arrange
-        var currentUserId = "user-id-123";
-        var groups = new List<Group>
+        string currentUserId = "user-id-123";
+        List<Group> groups = new List<Group>
         {
             new Group
             {
@@ -60,7 +61,7 @@ public class GetMyGroupsAsyncTests : GroupServiceTestBase
             .ReturnsAsync(groups);
 
         // Act
-        var result = await GroupService.GetMyGroupsAsync(currentUserId);
+        List<GroupResponse> result = await GroupService.GetMyGroupsAsync(currentUserId);
 
         // Assert
         Assert.NotNull(result);
@@ -73,14 +74,14 @@ public class GetMyGroupsAsyncTests : GroupServiceTestBase
     public async Task WithNoGroups_ReturnsEmptyList()
     {
         // Arrange
-        var currentUserId = "user-id-123";
+        string currentUserId = "user-id-123";
 
         GroupRepositoryMock
             .Setup(x => x.GetGroupsByUserIdAsync(currentUserId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<Group>());
 
         // Act
-        var result = await GroupService.GetMyGroupsAsync(currentUserId);
+        List<GroupResponse> result = await GroupService.GetMyGroupsAsync(currentUserId);
 
         // Assert
         Assert.NotNull(result);

@@ -11,13 +11,13 @@ public class LoginAsyncTests : AuthServiceTestBase
     public async Task WithValidCredentials_ReturnsAuthResponse()
     {
         // Arrange
-        var request = new LoginRequest
+        LoginRequest request = new LoginRequest
         {
             Email = "test@example.com",
             Password = "Password123!"
         };
 
-        var user = new User
+        User user = new User
         {
             Id = "user-id-123",
             Email = request.Email,
@@ -50,7 +50,7 @@ public class LoginAsyncTests : AuthServiceTestBase
             .Returns(DateTime.UtcNow.AddMinutes(15));
 
         // Act
-        var result = await AuthService.LoginAsync(request);
+        AuthResponse result = await AuthService.LoginAsync(request);
 
         // Assert
         Assert.NotNull(result);
@@ -64,7 +64,7 @@ public class LoginAsyncTests : AuthServiceTestBase
     public async Task WithNonexistentEmail_ThrowsAuthenticationException()
     {
         // Arrange
-        var request = new LoginRequest
+        LoginRequest request = new LoginRequest
         {
             Email = "nonexistent@example.com",
             Password = "Password123!"
@@ -75,7 +75,7 @@ public class LoginAsyncTests : AuthServiceTestBase
             .ReturnsAsync((User?)null);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<AuthenticationException>(
+        AuthenticationException exception = await Assert.ThrowsAsync<AuthenticationException>(
             () => AuthService.LoginAsync(request)
         );
 
@@ -86,13 +86,13 @@ public class LoginAsyncTests : AuthServiceTestBase
     public async Task WithUnconfirmedEmail_ThrowsAuthenticationException()
     {
         // Arrange
-        var request = new LoginRequest
+        LoginRequest request = new LoginRequest
         {
             Email = "test@example.com",
             Password = "Password123!"
         };
 
-        var user = new User
+        User user = new User
         {
             Id = "user-id-123",
             Email = request.Email
@@ -107,7 +107,7 @@ public class LoginAsyncTests : AuthServiceTestBase
             .ReturnsAsync(false);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<AuthenticationException>(
+        AuthenticationException exception = await Assert.ThrowsAsync<AuthenticationException>(
             () => AuthService.LoginAsync(request)
         );
 
@@ -118,13 +118,13 @@ public class LoginAsyncTests : AuthServiceTestBase
     public async Task WithInvalidPassword_ThrowsAuthenticationException()
     {
         // Arrange
-        var request = new LoginRequest
+        LoginRequest request = new LoginRequest
         {
             Email = "test@example.com",
             Password = "WrongPassword!"
         };
 
-        var user = new User
+        User user = new User
         {
             Id = "user-id-123",
             Email = request.Email
@@ -143,7 +143,7 @@ public class LoginAsyncTests : AuthServiceTestBase
             .ReturnsAsync(false);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<AuthenticationException>(
+        AuthenticationException exception = await Assert.ThrowsAsync<AuthenticationException>(
             () => AuthService.LoginAsync(request)
         );
 

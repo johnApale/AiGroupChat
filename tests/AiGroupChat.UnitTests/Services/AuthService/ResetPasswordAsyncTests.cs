@@ -11,14 +11,14 @@ public class ResetPasswordAsyncTests : AuthServiceTestBase
     public async Task WithValidToken_ResetsPasswordAndRevokesTokens()
     {
         // Arrange
-        var request = new ResetPasswordRequest
+        ResetPasswordRequest request = new ResetPasswordRequest
         {
             Email = "test@example.com",
             Token = "valid-reset-token",
             NewPassword = "NewPassword123!"
         };
 
-        var user = new User
+        User user = new User
         {
             Id = "user-id-123",
             Email = request.Email
@@ -37,7 +37,7 @@ public class ResetPasswordAsyncTests : AuthServiceTestBase
             .Returns(Task.CompletedTask);
 
         // Act
-        var result = await AuthService.ResetPasswordAsync(request);
+        MessageResponse result = await AuthService.ResetPasswordAsync(request);
 
         // Assert
         Assert.NotNull(result);
@@ -52,7 +52,7 @@ public class ResetPasswordAsyncTests : AuthServiceTestBase
     public async Task WithNonexistentEmail_ThrowsValidationException()
     {
         // Arrange
-        var request = new ResetPasswordRequest
+        ResetPasswordRequest request = new ResetPasswordRequest
         {
             Email = "nonexistent@example.com",
             Token = "some-token",
@@ -64,7 +64,7 @@ public class ResetPasswordAsyncTests : AuthServiceTestBase
             .ReturnsAsync((User?)null);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<ValidationException>(
+        ValidationException exception = await Assert.ThrowsAsync<ValidationException>(
             () => AuthService.ResetPasswordAsync(request)
         );
 
@@ -75,20 +75,20 @@ public class ResetPasswordAsyncTests : AuthServiceTestBase
     public async Task WithInvalidToken_ThrowsValidationException()
     {
         // Arrange
-        var request = new ResetPasswordRequest
+        ResetPasswordRequest request = new ResetPasswordRequest
         {
             Email = "test@example.com",
             Token = "invalid-token",
             NewPassword = "NewPassword123!"
         };
 
-        var user = new User
+        User user = new User
         {
             Id = "user-id-123",
             Email = request.Email
         };
 
-        var errors = new[] { "Invalid token." };
+        string[] errors = new[] { "Invalid token." };
 
         UserRepositoryMock
             .Setup(x => x.FindByEmailAsync(request.Email, It.IsAny<CancellationToken>()))
@@ -99,7 +99,7 @@ public class ResetPasswordAsyncTests : AuthServiceTestBase
             .ReturnsAsync((false, errors));
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<ValidationException>(
+        ValidationException exception = await Assert.ThrowsAsync<ValidationException>(
             () => AuthService.ResetPasswordAsync(request)
         );
 
@@ -110,20 +110,20 @@ public class ResetPasswordAsyncTests : AuthServiceTestBase
     public async Task WithWeakPassword_ThrowsValidationException()
     {
         // Arrange
-        var request = new ResetPasswordRequest
+        ResetPasswordRequest request = new ResetPasswordRequest
         {
             Email = "test@example.com",
             Token = "valid-token",
             NewPassword = "weak"
         };
 
-        var user = new User
+        User user = new User
         {
             Id = "user-id-123",
             Email = request.Email
         };
 
-        var errors = new[] { "Password must be at least 6 characters." };
+        string[] errors = new[] { "Password must be at least 6 characters." };
 
         UserRepositoryMock
             .Setup(x => x.FindByEmailAsync(request.Email, It.IsAny<CancellationToken>()))
@@ -134,7 +134,7 @@ public class ResetPasswordAsyncTests : AuthServiceTestBase
             .ReturnsAsync((false, errors));
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<ValidationException>(
+        ValidationException exception = await Assert.ThrowsAsync<ValidationException>(
             () => AuthService.ResetPasswordAsync(request)
         );
 

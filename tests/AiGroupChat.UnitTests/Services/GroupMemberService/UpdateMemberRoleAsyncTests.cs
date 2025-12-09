@@ -12,14 +12,14 @@ public class UpdateMemberRoleAsyncTests : GroupMemberServiceTestBase
     public async Task WithOwnerPromotingMemberToAdmin_UpdatesRole()
     {
         // Arrange
-        var groupId = Guid.NewGuid();
-        var ownerId = "owner-id";
-        var memberId = "member-id";
-        var request = new UpdateMemberRoleRequest { Role = "Admin" };
+        Guid groupId = Guid.NewGuid();
+        string ownerId = "owner-id";
+        string memberId = "member-id";
+        UpdateMemberRoleRequest request = new UpdateMemberRoleRequest { Role = "Admin" };
 
-        var group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
+        Group group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
 
-        var member = new GroupMember
+        GroupMember member = new GroupMember
         {
             UserId = memberId,
             Role = GroupRole.Member,
@@ -43,7 +43,7 @@ public class UpdateMemberRoleAsyncTests : GroupMemberServiceTestBase
             .ReturnsAsync((GroupMember m, CancellationToken _) => m);
 
         // Act
-        var result = await GroupMemberService.UpdateMemberRoleAsync(groupId, memberId, request, ownerId);
+        GroupMemberResponse result = await GroupMemberService.UpdateMemberRoleAsync(groupId, memberId, request, ownerId);
 
         // Assert
         Assert.NotNull(result);
@@ -55,14 +55,14 @@ public class UpdateMemberRoleAsyncTests : GroupMemberServiceTestBase
     public async Task WithOwnerDemotingAdminToMember_UpdatesRole()
     {
         // Arrange
-        var groupId = Guid.NewGuid();
-        var ownerId = "owner-id";
-        var adminId = "admin-id";
-        var request = new UpdateMemberRoleRequest { Role = "Member" };
+        Guid groupId = Guid.NewGuid();
+        string ownerId = "owner-id";
+        string adminId = "admin-id";
+        UpdateMemberRoleRequest request = new UpdateMemberRoleRequest { Role = "Member" };
 
-        var group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
+        Group group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
 
-        var admin = new GroupMember
+        GroupMember admin = new GroupMember
         {
             UserId = adminId,
             Role = GroupRole.Admin,
@@ -86,7 +86,7 @@ public class UpdateMemberRoleAsyncTests : GroupMemberServiceTestBase
             .ReturnsAsync((GroupMember m, CancellationToken _) => m);
 
         // Act
-        var result = await GroupMemberService.UpdateMemberRoleAsync(groupId, adminId, request, ownerId);
+        GroupMemberResponse result = await GroupMemberService.UpdateMemberRoleAsync(groupId, adminId, request, ownerId);
 
         // Assert
         Assert.NotNull(result);
@@ -98,12 +98,12 @@ public class UpdateMemberRoleAsyncTests : GroupMemberServiceTestBase
     public async Task WithNonOwner_ThrowsAuthorizationException()
     {
         // Arrange
-        var groupId = Guid.NewGuid();
-        var adminId = "admin-id";
-        var memberId = "member-id";
-        var request = new UpdateMemberRoleRequest { Role = "Admin" };
+        Guid groupId = Guid.NewGuid();
+        string adminId = "admin-id";
+        string memberId = "member-id";
+        UpdateMemberRoleRequest request = new UpdateMemberRoleRequest { Role = "Admin" };
 
-        var group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
+        Group group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
 
         GroupRepositoryMock
             .Setup(x => x.GetByIdAsync(groupId, It.IsAny<CancellationToken>()))
@@ -114,7 +114,7 @@ public class UpdateMemberRoleAsyncTests : GroupMemberServiceTestBase
             .ReturnsAsync(false);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<AuthorizationException>(
+        AuthorizationException exception = await Assert.ThrowsAsync<AuthorizationException>(
             () => GroupMemberService.UpdateMemberRoleAsync(groupId, memberId, request, adminId)
         );
 
@@ -125,13 +125,13 @@ public class UpdateMemberRoleAsyncTests : GroupMemberServiceTestBase
     public async Task WithChangingOwnerRole_ThrowsValidationException()
     {
         // Arrange
-        var groupId = Guid.NewGuid();
-        var ownerId = "owner-id";
-        var request = new UpdateMemberRoleRequest { Role = "Admin" };
+        Guid groupId = Guid.NewGuid();
+        string ownerId = "owner-id";
+        UpdateMemberRoleRequest request = new UpdateMemberRoleRequest { Role = "Admin" };
 
-        var group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
+        Group group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
 
-        var owner = new GroupMember
+        GroupMember owner = new GroupMember
         {
             UserId = ownerId,
             Role = GroupRole.Owner,
@@ -151,7 +151,7 @@ public class UpdateMemberRoleAsyncTests : GroupMemberServiceTestBase
             .ReturnsAsync(owner);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<ValidationException>(
+        ValidationException exception = await Assert.ThrowsAsync<ValidationException>(
             () => GroupMemberService.UpdateMemberRoleAsync(groupId, ownerId, request, ownerId)
         );
 
@@ -162,14 +162,14 @@ public class UpdateMemberRoleAsyncTests : GroupMemberServiceTestBase
     public async Task WithInvalidRole_ThrowsValidationException()
     {
         // Arrange
-        var groupId = Guid.NewGuid();
-        var ownerId = "owner-id";
-        var memberId = "member-id";
-        var request = new UpdateMemberRoleRequest { Role = "InvalidRole" };
+        Guid groupId = Guid.NewGuid();
+        string ownerId = "owner-id";
+        string memberId = "member-id";
+        UpdateMemberRoleRequest request = new UpdateMemberRoleRequest { Role = "InvalidRole" };
 
-        var group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
+        Group group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
 
-        var member = new GroupMember
+        GroupMember member = new GroupMember
         {
             UserId = memberId,
             Role = GroupRole.Member,
@@ -189,7 +189,7 @@ public class UpdateMemberRoleAsyncTests : GroupMemberServiceTestBase
             .ReturnsAsync(member);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<ValidationException>(
+        ValidationException exception = await Assert.ThrowsAsync<ValidationException>(
             () => GroupMemberService.UpdateMemberRoleAsync(groupId, memberId, request, ownerId)
         );
 
@@ -200,14 +200,14 @@ public class UpdateMemberRoleAsyncTests : GroupMemberServiceTestBase
     public async Task WithOwnerAsNewRole_ThrowsValidationException()
     {
         // Arrange
-        var groupId = Guid.NewGuid();
-        var ownerId = "owner-id";
-        var memberId = "member-id";
-        var request = new UpdateMemberRoleRequest { Role = "Owner" };
+        Guid groupId = Guid.NewGuid();
+        string ownerId = "owner-id";
+        string memberId = "member-id";
+        UpdateMemberRoleRequest request = new UpdateMemberRoleRequest { Role = "Owner" };
 
-        var group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
+        Group group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
 
-        var member = new GroupMember
+        GroupMember member = new GroupMember
         {
             UserId = memberId,
             Role = GroupRole.Member,
@@ -227,7 +227,7 @@ public class UpdateMemberRoleAsyncTests : GroupMemberServiceTestBase
             .ReturnsAsync(member);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<ValidationException>(
+        ValidationException exception = await Assert.ThrowsAsync<ValidationException>(
             () => GroupMemberService.UpdateMemberRoleAsync(groupId, memberId, request, ownerId)
         );
 
@@ -238,12 +238,12 @@ public class UpdateMemberRoleAsyncTests : GroupMemberServiceTestBase
     public async Task WithNonexistentMember_ThrowsNotFoundException()
     {
         // Arrange
-        var groupId = Guid.NewGuid();
-        var ownerId = "owner-id";
-        var nonMemberId = "non-member-id";
-        var request = new UpdateMemberRoleRequest { Role = "Admin" };
+        Guid groupId = Guid.NewGuid();
+        string ownerId = "owner-id";
+        string nonMemberId = "non-member-id";
+        UpdateMemberRoleRequest request = new UpdateMemberRoleRequest { Role = "Admin" };
 
-        var group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
+        Group group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
 
         GroupRepositoryMock
             .Setup(x => x.GetByIdAsync(groupId, It.IsAny<CancellationToken>()))
@@ -258,7 +258,7 @@ public class UpdateMemberRoleAsyncTests : GroupMemberServiceTestBase
             .ReturnsAsync((GroupMember?)null);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<NotFoundException>(
+        NotFoundException exception = await Assert.ThrowsAsync<NotFoundException>(
             () => GroupMemberService.UpdateMemberRoleAsync(groupId, nonMemberId, request, ownerId)
         );
 

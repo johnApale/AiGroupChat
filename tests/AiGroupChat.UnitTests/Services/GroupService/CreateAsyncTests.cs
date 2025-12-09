@@ -12,11 +12,11 @@ public class CreateAsyncTests : GroupServiceTestBase
     public async Task WithValidRequest_CreatesGroupAndReturnsResponse()
     {
         // Arrange
-        var request = new CreateGroupRequest
+        CreateGroupRequest request = new CreateGroupRequest
         {
             Name = "Test Group"
         };
-        var currentUserId = "user-id-123";
+        string currentUserId = "user-id-123";
 
         GroupRepositoryMock
             .Setup(x => x.CreateAsync(It.IsAny<Group>(), It.IsAny<CancellationToken>()))
@@ -58,7 +58,7 @@ public class CreateAsyncTests : GroupServiceTestBase
             });
 
         // Act
-        var result = await GroupService.CreateAsync(request, currentUserId);
+        GroupResponse result = await GroupService.CreateAsync(request, currentUserId);
 
         // Assert
         Assert.NotNull(result);
@@ -74,11 +74,11 @@ public class CreateAsyncTests : GroupServiceTestBase
     public async Task WithValidRequest_AssignsDefaultAiProvider()
     {
         // Arrange
-        var request = new CreateGroupRequest
+        CreateGroupRequest request = new CreateGroupRequest
         {
             Name = "Test Group"
         };
-        var currentUserId = "user-id-123";
+        string currentUserId = "user-id-123";
 
         GroupRepositoryMock
             .Setup(x => x.CreateAsync(It.IsAny<Group>(), It.IsAny<CancellationToken>()))
@@ -115,18 +115,18 @@ public class CreateAsyncTests : GroupServiceTestBase
     public async Task WithNoEnabledProviders_ThrowsValidationException()
     {
         // Arrange
-        var request = new CreateGroupRequest
+        CreateGroupRequest request = new CreateGroupRequest
         {
             Name = "Test Group"
         };
-        var currentUserId = "user-id-123";
+        string currentUserId = "user-id-123";
 
         AiProviderRepositoryMock
             .Setup(x => x.GetDefaultAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync((AiProvider?)null);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<ValidationException>(
+        ValidationException exception = await Assert.ThrowsAsync<ValidationException>(
             () => GroupService.CreateAsync(request, currentUserId));
 
         Assert.Contains("No AI providers are available", exception.Message);
@@ -136,11 +136,11 @@ public class CreateAsyncTests : GroupServiceTestBase
     public async Task WithValidRequest_AddsCreatorAsOwner()
     {
         // Arrange
-        var request = new CreateGroupRequest
+        CreateGroupRequest request = new CreateGroupRequest
         {
             Name = "Test Group"
         };
-        var currentUserId = "user-id-123";
+        string currentUserId = "user-id-123";
 
         GroupRepositoryMock
             .Setup(x => x.CreateAsync(It.IsAny<Group>(), It.IsAny<CancellationToken>()))

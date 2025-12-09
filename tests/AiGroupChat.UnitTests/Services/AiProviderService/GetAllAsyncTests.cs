@@ -1,3 +1,5 @@
+using AiGroupChat.Application.DTOs.AiProviders;
+using AiGroupChat.Domain.Entities;
 using Moq;
 
 namespace AiGroupChat.UnitTests.Services.AiProviderService;
@@ -13,7 +15,7 @@ public class GetAllAsyncTests : AiProviderServiceTestBase
             .ReturnsAsync(TestProviders);
 
         // Act
-        var result = await AiProviderService.GetAllAsync();
+        List<AiProviderResponse> result = await AiProviderService.GetAllAsync();
 
         // Assert
         Assert.Equal(3, result.Count);
@@ -28,10 +30,10 @@ public class GetAllAsyncTests : AiProviderServiceTestBase
         // Arrange
         AiProviderRepositoryMock
             .Setup(x => x.GetAllEnabledAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<Domain.Entities.AiProvider>());
+            .ReturnsAsync(new List<AiProvider>());
 
         // Act
-        var result = await AiProviderService.GetAllAsync();
+        List<AiProviderResponse> result = await AiProviderService.GetAllAsync();
 
         // Assert
         Assert.Empty(result);
@@ -41,17 +43,17 @@ public class GetAllAsyncTests : AiProviderServiceTestBase
     public async Task ReturnsCorrectDtoMapping()
     {
         // Arrange
-        var provider = TestProviders[0];
+        AiProvider provider = TestProviders[0];
         AiProviderRepositoryMock
             .Setup(x => x.GetAllEnabledAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<Domain.Entities.AiProvider> { provider });
+            .ReturnsAsync(new List<AiProvider> { provider });
 
         // Act
-        var result = await AiProviderService.GetAllAsync();
+        List<AiProviderResponse> result = await AiProviderService.GetAllAsync();
 
         // Assert
         Assert.Single(result);
-        var dto = result[0];
+        AiProviderResponse dto = result[0];
         Assert.Equal(provider.Id, dto.Id);
         Assert.Equal(provider.Name, dto.Name);
         Assert.Equal(provider.DisplayName, dto.DisplayName);

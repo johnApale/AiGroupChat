@@ -11,12 +11,12 @@ public class ForgotPasswordAsyncTests : AuthServiceTestBase
     public async Task WithExistingUser_SendsResetEmailAndReturnsMessage()
     {
         // Arrange
-        var request = new ForgotPasswordRequest
+        ForgotPasswordRequest request = new ForgotPasswordRequest
         {
             Email = "test@example.com"
         };
 
-        var user = new User
+        User user = new User
         {
             Id = "user-id-123",
             Email = request.Email,
@@ -40,7 +40,7 @@ public class ForgotPasswordAsyncTests : AuthServiceTestBase
             .ReturnsAsync(EmailResult.Success("email-id"));
 
         // Act
-        var result = await AuthService.ForgotPasswordAsync(request);
+        MessageResponse result = await AuthService.ForgotPasswordAsync(request);
 
         // Assert
         Assert.NotNull(result);
@@ -59,7 +59,7 @@ public class ForgotPasswordAsyncTests : AuthServiceTestBase
     public async Task WithNonexistentEmail_ReturnsSuccessToPreventEnumeration()
     {
         // Arrange
-        var request = new ForgotPasswordRequest
+        ForgotPasswordRequest request = new ForgotPasswordRequest
         {
             Email = "nonexistent@example.com"
         };
@@ -69,7 +69,7 @@ public class ForgotPasswordAsyncTests : AuthServiceTestBase
             .ReturnsAsync((User?)null);
 
         // Act
-        var result = await AuthService.ForgotPasswordAsync(request);
+        MessageResponse result = await AuthService.ForgotPasswordAsync(request);
 
         // Assert
         Assert.NotNull(result);

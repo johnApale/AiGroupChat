@@ -11,12 +11,12 @@ public class RefreshTokenAsyncTests : AuthServiceTestBase
     public async Task WithValidToken_ReturnsNewAuthResponse()
     {
         // Arrange
-        var request = new RefreshTokenRequest
+        RefreshTokenRequest request = new RefreshTokenRequest
         {
             RefreshToken = "valid-refresh-token"
         };
 
-        var user = new User
+        User user = new User
         {
             Id = "user-id-123",
             Email = "test@example.com",
@@ -49,7 +49,7 @@ public class RefreshTokenAsyncTests : AuthServiceTestBase
             .Returns(DateTime.UtcNow.AddMinutes(15));
 
         // Act
-        var result = await AuthService.RefreshTokenAsync(request);
+        AuthResponse result = await AuthService.RefreshTokenAsync(request);
 
         // Assert
         Assert.NotNull(result);
@@ -62,12 +62,12 @@ public class RefreshTokenAsyncTests : AuthServiceTestBase
     public async Task WithValidToken_RevokesOldToken()
     {
         // Arrange
-        var request = new RefreshTokenRequest
+        RefreshTokenRequest request = new RefreshTokenRequest
         {
             RefreshToken = "valid-refresh-token"
         };
 
-        var user = new User
+        User user = new User
         {
             Id = "user-id-123",
             Email = "test@example.com",
@@ -112,7 +112,7 @@ public class RefreshTokenAsyncTests : AuthServiceTestBase
     public async Task WithInvalidToken_ThrowsAuthenticationException()
     {
         // Arrange
-        var request = new RefreshTokenRequest
+        RefreshTokenRequest request = new RefreshTokenRequest
         {
             RefreshToken = "invalid-refresh-token"
         };
@@ -122,7 +122,7 @@ public class RefreshTokenAsyncTests : AuthServiceTestBase
             .ReturnsAsync((string?)null);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<AuthenticationException>(
+        AuthenticationException exception = await Assert.ThrowsAsync<AuthenticationException>(
             () => AuthService.RefreshTokenAsync(request)
         );
 
@@ -133,7 +133,7 @@ public class RefreshTokenAsyncTests : AuthServiceTestBase
     public async Task WithDeletedUser_ThrowsAuthenticationException()
     {
         // Arrange
-        var request = new RefreshTokenRequest
+        RefreshTokenRequest request = new RefreshTokenRequest
         {
             RefreshToken = "valid-refresh-token"
         };
@@ -147,7 +147,7 @@ public class RefreshTokenAsyncTests : AuthServiceTestBase
             .ReturnsAsync((User?)null);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<AuthenticationException>(
+        AuthenticationException exception = await Assert.ThrowsAsync<AuthenticationException>(
             () => AuthService.RefreshTokenAsync(request)
         );
 

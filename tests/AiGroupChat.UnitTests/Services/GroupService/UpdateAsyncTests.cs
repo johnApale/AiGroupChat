@@ -12,14 +12,14 @@ public class UpdateAsyncTests : GroupServiceTestBase
     public async Task WithValidRequestAndAdmin_UpdatesAndReturnsGroup()
     {
         // Arrange
-        var groupId = Guid.NewGuid();
-        var currentUserId = "user-id-123";
-        var request = new UpdateGroupRequest
+        Guid groupId = Guid.NewGuid();
+        string currentUserId = "user-id-123";
+        UpdateGroupRequest request = new UpdateGroupRequest
         {
             Name = "Updated Group Name"
         };
 
-        var group = new Group
+        Group group = new Group
         {
             Id = groupId,
             Name = "Original Name",
@@ -53,7 +53,7 @@ public class UpdateAsyncTests : GroupServiceTestBase
             .ReturnsAsync((Group g, CancellationToken _) => g);
 
         // Act
-        var result = await GroupService.UpdateAsync(groupId, request, currentUserId);
+        GroupResponse result = await GroupService.UpdateAsync(groupId, request, currentUserId);
 
         // Assert
         Assert.NotNull(result);
@@ -64,16 +64,16 @@ public class UpdateAsyncTests : GroupServiceTestBase
     public async Task WithNonexistentGroup_ThrowsNotFoundException()
     {
         // Arrange
-        var groupId = Guid.NewGuid();
-        var currentUserId = "user-id-123";
-        var request = new UpdateGroupRequest { Name = "Updated Name" };
+        Guid groupId = Guid.NewGuid();
+        string currentUserId = "user-id-123";
+        UpdateGroupRequest request = new UpdateGroupRequest { Name = "Updated Name" };
 
         GroupRepositoryMock
             .Setup(x => x.GetByIdAsync(groupId, It.IsAny<CancellationToken>()))
             .ReturnsAsync((Group?)null);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<NotFoundException>(
+        NotFoundException exception = await Assert.ThrowsAsync<NotFoundException>(
             () => GroupService.UpdateAsync(groupId, request, currentUserId)
         );
 
@@ -84,11 +84,11 @@ public class UpdateAsyncTests : GroupServiceTestBase
     public async Task WithNonAdmin_ThrowsAuthorizationException()
     {
         // Arrange
-        var groupId = Guid.NewGuid();
-        var currentUserId = "user-id-123";
-        var request = new UpdateGroupRequest { Name = "Updated Name" };
+        Guid groupId = Guid.NewGuid();
+        string currentUserId = "user-id-123";
+        UpdateGroupRequest request = new UpdateGroupRequest { Name = "Updated Name" };
 
-        var group = new Group
+        Group group = new Group
         {
             Id = groupId,
             Name = "Original Name",
@@ -115,7 +115,7 @@ public class UpdateAsyncTests : GroupServiceTestBase
             .ReturnsAsync(false);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<AuthorizationException>(
+        AuthorizationException exception = await Assert.ThrowsAsync<AuthorizationException>(
             () => GroupService.UpdateAsync(groupId, request, currentUserId)
         );
 

@@ -12,7 +12,7 @@ public class RegisterAsyncTests : AuthServiceTestBase
     public async Task WithValidRequest_ReturnsSuccessMessage()
     {
         // Arrange
-        var request = new RegisterRequest
+        RegisterRequest request = new RegisterRequest
         {
             Email = "test@example.com",
             UserName = "testuser",
@@ -37,7 +37,7 @@ public class RegisterAsyncTests : AuthServiceTestBase
             .ReturnsAsync(EmailResult.Success("email-id"));
 
         // Act
-        var result = await AuthService.RegisterAsync(request);
+        MessageResponse result = await AuthService.RegisterAsync(request);
 
         // Assert
         Assert.NotNull(result);
@@ -48,7 +48,7 @@ public class RegisterAsyncTests : AuthServiceTestBase
     public async Task WithInvalidData_ThrowsValidationException()
     {
         // Arrange
-        var request = new RegisterRequest
+        RegisterRequest request = new RegisterRequest
         {
             Email = "test@example.com",
             UserName = "testuser",
@@ -56,14 +56,14 @@ public class RegisterAsyncTests : AuthServiceTestBase
             Password = "weak"
         };
 
-        var errors = new[] { "Password must be at least 6 characters." };
+        string[] errors = new[] { "Password must be at least 6 characters." };
 
         UserRepositoryMock
             .Setup(x => x.CreateAsync(It.IsAny<User>(), request.Password, It.IsAny<CancellationToken>()))
             .ReturnsAsync((false, errors));
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<ValidationException>(
+        ValidationException exception = await Assert.ThrowsAsync<ValidationException>(
             () => AuthService.RegisterAsync(request)
         );
 
@@ -74,7 +74,7 @@ public class RegisterAsyncTests : AuthServiceTestBase
     public async Task SendsConfirmationEmail()
     {
         // Arrange
-        var request = new RegisterRequest
+        RegisterRequest request = new RegisterRequest
         {
             Email = "test@example.com",
             UserName = "testuser",

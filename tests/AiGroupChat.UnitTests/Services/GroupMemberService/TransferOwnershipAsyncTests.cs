@@ -12,21 +12,21 @@ public class TransferOwnershipAsyncTests : GroupMemberServiceTestBase
     public async Task WithValidRequest_TransfersOwnership()
     {
         // Arrange
-        var groupId = Guid.NewGuid();
-        var currentOwnerId = "owner-id";
-        var newOwnerId = "new-owner-id";
-        var request = new TransferOwnershipRequest { NewOwnerUserId = newOwnerId };
+        Guid groupId = Guid.NewGuid();
+        string currentOwnerId = "owner-id";
+        string newOwnerId = "new-owner-id";
+        TransferOwnershipRequest request = new TransferOwnershipRequest { NewOwnerUserId = newOwnerId };
 
-        var group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
+        Group group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
         
-        var currentOwner = new GroupMember
+        GroupMember currentOwner = new GroupMember
         {
             UserId = currentOwnerId,
             Role = GroupRole.Owner,
             User = new User { Id = currentOwnerId, UserName = "owner", DisplayName = "Owner" }
         };
 
-        var newOwner = new GroupMember
+        GroupMember newOwner = new GroupMember
         {
             UserId = newOwnerId,
             Role = GroupRole.Member,
@@ -50,7 +50,7 @@ public class TransferOwnershipAsyncTests : GroupMemberServiceTestBase
             .ReturnsAsync((GroupMember m, CancellationToken _) => m);
 
         // Act
-        var result = await GroupMemberService.TransferOwnershipAsync(groupId, request, currentOwnerId);
+        GroupMemberResponse result = await GroupMemberService.TransferOwnershipAsync(groupId, request, currentOwnerId);
 
         // Assert
         Assert.NotNull(result);
@@ -64,14 +64,14 @@ public class TransferOwnershipAsyncTests : GroupMemberServiceTestBase
     public async Task WithNonOwner_ThrowsAuthorizationException()
     {
         // Arrange
-        var groupId = Guid.NewGuid();
-        var adminId = "admin-id";
-        var newOwnerId = "new-owner-id";
-        var request = new TransferOwnershipRequest { NewOwnerUserId = newOwnerId };
+        Guid groupId = Guid.NewGuid();
+        string adminId = "admin-id";
+        string newOwnerId = "new-owner-id";
+        TransferOwnershipRequest request = new TransferOwnershipRequest { NewOwnerUserId = newOwnerId };
 
-        var group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
+        Group group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
         
-        var admin = new GroupMember
+        GroupMember admin = new GroupMember
         {
             UserId = adminId,
             Role = GroupRole.Admin,
@@ -87,7 +87,7 @@ public class TransferOwnershipAsyncTests : GroupMemberServiceTestBase
             .ReturnsAsync(admin);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<AuthorizationException>(
+        AuthorizationException exception = await Assert.ThrowsAsync<AuthorizationException>(
             () => GroupMemberService.TransferOwnershipAsync(groupId, request, adminId)
         );
 
@@ -98,14 +98,14 @@ public class TransferOwnershipAsyncTests : GroupMemberServiceTestBase
     public async Task WithNonMemberAsNewOwner_ThrowsNotFoundException()
     {
         // Arrange
-        var groupId = Guid.NewGuid();
-        var currentOwnerId = "owner-id";
-        var nonMemberId = "non-member-id";
-        var request = new TransferOwnershipRequest { NewOwnerUserId = nonMemberId };
+        Guid groupId = Guid.NewGuid();
+        string currentOwnerId = "owner-id";
+        string nonMemberId = "non-member-id";
+        TransferOwnershipRequest request = new TransferOwnershipRequest { NewOwnerUserId = nonMemberId };
 
-        var group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
+        Group group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
         
-        var currentOwner = new GroupMember
+        GroupMember currentOwner = new GroupMember
         {
             UserId = currentOwnerId,
             Role = GroupRole.Owner,
@@ -125,7 +125,7 @@ public class TransferOwnershipAsyncTests : GroupMemberServiceTestBase
             .ReturnsAsync((GroupMember?)null);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<NotFoundException>(
+        NotFoundException exception = await Assert.ThrowsAsync<NotFoundException>(
             () => GroupMemberService.TransferOwnershipAsync(groupId, request, currentOwnerId)
         );
 
@@ -136,13 +136,13 @@ public class TransferOwnershipAsyncTests : GroupMemberServiceTestBase
     public async Task WithTransferToSelf_ThrowsValidationException()
     {
         // Arrange
-        var groupId = Guid.NewGuid();
-        var ownerId = "owner-id";
-        var request = new TransferOwnershipRequest { NewOwnerUserId = ownerId };
+        Guid groupId = Guid.NewGuid();
+        string ownerId = "owner-id";
+        TransferOwnershipRequest request = new TransferOwnershipRequest { NewOwnerUserId = ownerId };
 
-        var group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
+        Group group = new Group { Id = groupId, Name = "Test Group", Members = new List<GroupMember>() };
         
-        var owner = new GroupMember
+        GroupMember owner = new GroupMember
         {
             UserId = ownerId,
             Role = GroupRole.Owner,
@@ -158,7 +158,7 @@ public class TransferOwnershipAsyncTests : GroupMemberServiceTestBase
             .ReturnsAsync(owner);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<ValidationException>(
+        ValidationException exception = await Assert.ThrowsAsync<ValidationException>(
             () => GroupMemberService.TransferOwnershipAsync(groupId, request, ownerId)
         );
 
@@ -169,15 +169,15 @@ public class TransferOwnershipAsyncTests : GroupMemberServiceTestBase
     public async Task WithNonexistentGroup_ThrowsNotFoundException()
     {
         // Arrange
-        var groupId = Guid.NewGuid();
-        var request = new TransferOwnershipRequest { NewOwnerUserId = "new-owner-id" };
+        Guid groupId = Guid.NewGuid();
+        TransferOwnershipRequest request = new TransferOwnershipRequest { NewOwnerUserId = "new-owner-id" };
 
         GroupRepositoryMock
             .Setup(x => x.GetByIdAsync(groupId, It.IsAny<CancellationToken>()))
             .ReturnsAsync((Group?)null);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<NotFoundException>(
+        NotFoundException exception = await Assert.ThrowsAsync<NotFoundException>(
             () => GroupMemberService.TransferOwnershipAsync(groupId, request, "owner-id")
         );
 

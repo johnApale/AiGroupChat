@@ -1,3 +1,4 @@
+using AiGroupChat.Application.DTOs.Users;
 using AiGroupChat.Application.Exceptions;
 using AiGroupChat.Domain.Entities;
 using Moq;
@@ -10,7 +11,7 @@ public class GetByIdAsyncTests : UserServiceTestBase
     public async Task WithValidId_ReturnsUserResponse()
     {
         // Arrange
-        var user = new User
+        User user = new User
         {
             Id = "user-id-123",
             Email = "test@example.com",
@@ -24,7 +25,7 @@ public class GetByIdAsyncTests : UserServiceTestBase
             .ReturnsAsync(user);
 
         // Act
-        var result = await UserService.GetByIdAsync(user.Id);
+        UserResponse result = await UserService.GetByIdAsync(user.Id);
 
         // Assert
         Assert.NotNull(result);
@@ -39,14 +40,14 @@ public class GetByIdAsyncTests : UserServiceTestBase
     public async Task WithNonexistentId_ThrowsNotFoundException()
     {
         // Arrange
-        var userId = "nonexistent-id";
+        string userId = "nonexistent-id";
 
         UserRepositoryMock
             .Setup(x => x.FindByIdAsync(userId, It.IsAny<CancellationToken>()))
             .ReturnsAsync((User?)null);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<NotFoundException>(
+        NotFoundException exception = await Assert.ThrowsAsync<NotFoundException>(
             () => UserService.GetByIdAsync(userId)
         );
 

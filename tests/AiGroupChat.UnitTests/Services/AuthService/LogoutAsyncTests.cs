@@ -9,7 +9,7 @@ public class LogoutAsyncTests : AuthServiceTestBase
     public async Task WithValidToken_RevokesTokenAndReturnsMessage()
     {
         // Arrange
-        var request = new LogoutRequest
+        LogoutRequest request = new LogoutRequest
         {
             RefreshToken = "valid-refresh-token"
         };
@@ -19,7 +19,7 @@ public class LogoutAsyncTests : AuthServiceTestBase
             .Returns(Task.CompletedTask);
 
         // Act
-        var result = await AuthService.LogoutAsync(request);
+        MessageResponse result = await AuthService.LogoutAsync(request);
 
         // Assert
         Assert.NotNull(result);
@@ -34,7 +34,7 @@ public class LogoutAsyncTests : AuthServiceTestBase
     public async Task WithInvalidToken_StillReturnsSuccessMessage()
     {
         // Arrange
-        var request = new LogoutRequest
+        LogoutRequest request = new LogoutRequest
         {
             RefreshToken = "nonexistent-token"
         };
@@ -44,7 +44,7 @@ public class LogoutAsyncTests : AuthServiceTestBase
             .Returns(Task.CompletedTask);
 
         // Act
-        var result = await AuthService.LogoutAsync(request);
+        MessageResponse result = await AuthService.LogoutAsync(request);
 
         // Assert
         Assert.NotNull(result);

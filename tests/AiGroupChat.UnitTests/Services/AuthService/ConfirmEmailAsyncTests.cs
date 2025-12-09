@@ -11,13 +11,13 @@ public class ConfirmEmailAsyncTests : AuthServiceTestBase
     public async Task WithValidToken_ReturnsAuthResponse()
     {
         // Arrange
-        var request = new ConfirmEmailRequest
+        ConfirmEmailRequest request = new ConfirmEmailRequest
         {
             Email = "test@example.com",
             Token = "valid-confirmation-token"
         };
 
-        var user = new User
+        User user = new User
         {
             Id = "user-id-123",
             Email = request.Email,
@@ -46,7 +46,7 @@ public class ConfirmEmailAsyncTests : AuthServiceTestBase
             .Returns(DateTime.UtcNow.AddMinutes(15));
 
         // Act
-        var result = await AuthService.ConfirmEmailAsync(request);
+        AuthResponse result = await AuthService.ConfirmEmailAsync(request);
 
         // Assert
         Assert.NotNull(result);
@@ -59,7 +59,7 @@ public class ConfirmEmailAsyncTests : AuthServiceTestBase
     public async Task WithNonexistentEmail_ThrowsValidationException()
     {
         // Arrange
-        var request = new ConfirmEmailRequest
+        ConfirmEmailRequest request = new ConfirmEmailRequest
         {
             Email = "nonexistent@example.com",
             Token = "some-token"
@@ -70,7 +70,7 @@ public class ConfirmEmailAsyncTests : AuthServiceTestBase
             .ReturnsAsync((User?)null);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<ValidationException>(
+        ValidationException exception = await Assert.ThrowsAsync<ValidationException>(
             () => AuthService.ConfirmEmailAsync(request)
         );
 
@@ -81,13 +81,13 @@ public class ConfirmEmailAsyncTests : AuthServiceTestBase
     public async Task WithInvalidToken_ThrowsValidationException()
     {
         // Arrange
-        var request = new ConfirmEmailRequest
+        ConfirmEmailRequest request = new ConfirmEmailRequest
         {
             Email = "test@example.com",
             Token = "invalid-token"
         };
 
-        var user = new User
+        User user = new User
         {
             Id = "user-id-123",
             Email = request.Email
@@ -102,7 +102,7 @@ public class ConfirmEmailAsyncTests : AuthServiceTestBase
             .ReturnsAsync(false);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<ValidationException>(
+        ValidationException exception = await Assert.ThrowsAsync<ValidationException>(
             () => AuthService.ConfirmEmailAsync(request)
         );
 

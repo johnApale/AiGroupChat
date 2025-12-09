@@ -1,3 +1,4 @@
+using AiGroupChat.Application.DTOs.Groups;
 using AiGroupChat.Application.Exceptions;
 using AiGroupChat.Domain.Entities;
 using AiGroupChat.Domain.Enums;
@@ -11,9 +12,9 @@ public class GetByIdAsyncTests : GroupServiceTestBase
     public async Task WithValidIdAndMember_ReturnsGroupResponse()
     {
         // Arrange
-        var groupId = Guid.NewGuid();
-        var currentUserId = "user-id-123";
-        var group = new Group
+        Guid groupId = Guid.NewGuid();
+        string currentUserId = "user-id-123";
+        Group group = new Group
         {
             Id = groupId,
             Name = "Test Group",
@@ -43,7 +44,7 @@ public class GetByIdAsyncTests : GroupServiceTestBase
             .ReturnsAsync(true);
 
         // Act
-        var result = await GroupService.GetByIdAsync(groupId, currentUserId);
+        GroupResponse result = await GroupService.GetByIdAsync(groupId, currentUserId);
 
         // Assert
         Assert.NotNull(result);
@@ -56,15 +57,15 @@ public class GetByIdAsyncTests : GroupServiceTestBase
     public async Task WithNonexistentGroup_ThrowsNotFoundException()
     {
         // Arrange
-        var groupId = Guid.NewGuid();
-        var currentUserId = "user-id-123";
+        Guid groupId = Guid.NewGuid();
+        string currentUserId = "user-id-123";
 
         GroupRepositoryMock
             .Setup(x => x.GetByIdAsync(groupId, It.IsAny<CancellationToken>()))
             .ReturnsAsync((Group?)null);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<NotFoundException>(
+        NotFoundException exception = await Assert.ThrowsAsync<NotFoundException>(
             () => GroupService.GetByIdAsync(groupId, currentUserId)
         );
 
@@ -75,9 +76,9 @@ public class GetByIdAsyncTests : GroupServiceTestBase
     public async Task WithNonMember_ThrowsAuthorizationException()
     {
         // Arrange
-        var groupId = Guid.NewGuid();
-        var currentUserId = "user-id-123";
-        var group = new Group
+        Guid groupId = Guid.NewGuid();
+        string currentUserId = "user-id-123";
+        Group group = new Group
         {
             Id = groupId,
             Name = "Test Group",
@@ -96,7 +97,7 @@ public class GetByIdAsyncTests : GroupServiceTestBase
             .ReturnsAsync(false);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<AuthorizationException>(
+        AuthorizationException exception = await Assert.ThrowsAsync<AuthorizationException>(
             () => GroupService.GetByIdAsync(groupId, currentUserId)
         );
 

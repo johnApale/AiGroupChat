@@ -11,10 +11,10 @@ public class DeleteAsyncTests : GroupServiceTestBase
     public async Task WithValidIdAndOwner_DeletesGroup()
     {
         // Arrange
-        var groupId = Guid.NewGuid();
-        var currentUserId = "user-id-123";
+        Guid groupId = Guid.NewGuid();
+        string currentUserId = "user-id-123";
 
-        var group = new Group
+        Group group = new Group
         {
             Id = groupId,
             Name = "Test Group",
@@ -57,15 +57,15 @@ public class DeleteAsyncTests : GroupServiceTestBase
     public async Task WithNonexistentGroup_ThrowsNotFoundException()
     {
         // Arrange
-        var groupId = Guid.NewGuid();
-        var currentUserId = "user-id-123";
+        Guid groupId = Guid.NewGuid();
+        string currentUserId = "user-id-123";
 
         GroupRepositoryMock
             .Setup(x => x.GetByIdAsync(groupId, It.IsAny<CancellationToken>()))
             .ReturnsAsync((Group?)null);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<NotFoundException>(
+        NotFoundException exception = await Assert.ThrowsAsync<NotFoundException>(
             () => GroupService.DeleteAsync(groupId, currentUserId)
         );
 
@@ -76,10 +76,10 @@ public class DeleteAsyncTests : GroupServiceTestBase
     public async Task WithNonOwner_ThrowsAuthorizationException()
     {
         // Arrange
-        var groupId = Guid.NewGuid();
-        var currentUserId = "user-id-123";
+        Guid groupId = Guid.NewGuid();
+        string currentUserId = "user-id-123";
 
-        var group = new Group
+        Group group = new Group
         {
             Id = groupId,
             Name = "Test Group",
@@ -106,7 +106,7 @@ public class DeleteAsyncTests : GroupServiceTestBase
             .ReturnsAsync(false);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<AuthorizationException>(
+        AuthorizationException exception = await Assert.ThrowsAsync<AuthorizationException>(
             () => GroupService.DeleteAsync(groupId, currentUserId)
         );
 
