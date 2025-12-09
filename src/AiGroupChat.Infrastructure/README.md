@@ -57,6 +57,7 @@ AiGroupChat.Infrastructure/
 | `IdentityUserRepository` | `IUserRepository`       | Wraps ASP.NET Identity UserManager                                     |
 | `GroupRepository`        | `IGroupRepository`      | Group CRUD, membership checks, member management, includes AI provider |
 | `AiProviderRepository`   | `IAiProviderRepository` | AI provider queries (enabled providers, by ID)                         |
+| `MessageRepository`      | `IMessageRepository`    | Message CRUD and paginated queries                                     |
 
 ## Services
 

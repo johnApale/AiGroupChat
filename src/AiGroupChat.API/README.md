@@ -34,14 +34,15 @@ AiGroupChat.API/
 
 ## Controllers
 
-| Controller               | Route                     | Purpose                     |
-| ------------------------ | ------------------------- | --------------------------- |
-| `AuthController`         | `/api/auth`               | Authentication endpoints    |
-| `UsersController`        | `/api/users`              | User profile endpoints      |
-| `GroupsController`       | `/api/groups`             | Group management endpoints  |
-| `GroupMembersController` | `/api/groups/:id/members` | Member management endpoints |
-| `GroupOwnerController`   | `/api/groups/:id/owner`   | Ownership transfer endpoint |
-| `AiProvidersController`  | `/api/ai-providers`       | AI provider endpoints       |
+| Controller               | Route                      | Purpose                     |
+| ------------------------ | -------------------------- | --------------------------- |
+| `AuthController`         | `/api/auth`                | Authentication endpoints    |
+| `UsersController`        | `/api/users`               | User profile endpoints      |
+| `GroupsController`       | `/api/groups`              | Group management endpoints  |
+| `GroupMembersController` | `/api/groups/:id/members`  | Member management endpoints |
+| `GroupOwnerController`   | `/api/groups/:id/owner`    | Ownership transfer endpoint |
+| `AiProvidersController`  | `/api/ai-providers`        | AI provider endpoints       |
+| `MessagesController`     | `/api/groups/:id/messages` | Message endpoints           |
 
 ## Authentication Endpoints
 
@@ -93,6 +94,13 @@ AiGroupChat.API/
 | ------ | ----------------------- | -------------------------- | ------------- |
 | GET    | `/api/ai-providers`     | List all enabled providers | Yes           |
 | GET    | `/api/ai-providers/:id` | Get provider by ID         | Yes           |
+
+## Message Endpoints
+
+| Method | Endpoint                   | Description              | Auth Required |
+| ------ | -------------------------- | ------------------------ | ------------- |
+| POST   | `/api/groups/:id/messages` | Send message             | Yes (member)  |
+| GET    | `/api/groups/:id/messages` | Get messages (paginated) | Yes (member)  |
 
 ## Middleware
 

@@ -68,6 +68,9 @@ DTOs (Data Transfer Objects) define the shape of data for API requests and respo
 | `GroupResponse`             | Group details with members and AI provider   |
 | `GroupMemberResponse`       | Group member profile data                    |
 | `AiProviderResponse`        | AI provider details (id, name, model, etc.)  |
+| `SendMessageRequest`        | Message creation input                       |
+| `MessageResponse`           | Message details with sender info             |
+| `PaginatedResponse<T>`      | Generic paginated response wrapper           |
 
 ## Interfaces
 
@@ -85,6 +88,8 @@ Interfaces define contracts that are implemented in other layers.
 | `IGroupMemberService`   | Application    | Group member management           |
 | `IAiProviderRepository` | Infrastructure | AI provider data access           |
 | `IAiProviderService`    | Application    | AI provider listing and retrieval |
+| `IMessageRepository`    | Infrastructure | Message data access               |
+| `IMessageService`       | Application    | Message sending and retrieval     |
 
 ## Exceptions
 
@@ -105,6 +110,8 @@ Custom exceptions for consistent error handling.
 | `UserService`        | Handles user lookup by ID and current user retrieval                     |
 | `GroupService`       | Handles group creation, retrieval, update, delete with authorization     |
 | `GroupMemberService` | Handles member add/remove, role changes, leave group, transfer ownership |
+| `AiProviderService`  | Handles listing and retrieving AI providers                              |
+| `MessageService`     | Handles sending messages and paginated retrieval                         |
 | `AiProviderService`  | Handles listing and retrieving enabled AI providers                      |
 
 ## Usage
