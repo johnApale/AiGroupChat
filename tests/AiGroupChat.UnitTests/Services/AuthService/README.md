@@ -84,11 +84,11 @@ All tests follow the AAA pattern:
 public async Task WithValidCredentials_ReturnsAuthResponse()
 {
     // Arrange - Set up mocks and test data
-    var request = new LoginRequest { ... };
+    LoginRequest request = new LoginRequest { ... };
     UserRepositoryMock.Setup(...);
 
     // Act - Call the method under test
-    var result = await AuthService.LoginAsync(request);
+    AuthResponse result = await AuthService.LoginAsync(request);
 
     // Assert - Verify the results
     Assert.NotNull(result);
@@ -139,14 +139,14 @@ Example:
 public async Task WithSpecificCondition_ExpectedBehavior()
 {
     // Arrange
-    var request = new SomeRequest { ... };
+    SomeRequest request = new SomeRequest { ... };
 
     UserRepositoryMock
         .Setup(x => x.SomeMethod(...))
         .ReturnsAsync(expectedValue);
 
     // Act
-    var result = await AuthService.SomeMethodAsync(request);
+    SomeResponse result = await AuthService.SomeMethodAsync(request);
 
     // Assert
     Assert.NotNull(result);

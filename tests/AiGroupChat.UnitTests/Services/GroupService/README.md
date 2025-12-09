@@ -77,11 +77,11 @@ All tests follow the AAA pattern:
 public async Task WithValidRequestAndAdmin_UpdatesAndReturnsGroup()
 {
     // Arrange - Set up mocks and test data
-    var request = new UpdateGroupRequest { ... };
+    UpdateGroupRequest request = new UpdateGroupRequest { ... };
     GroupRepositoryMock.Setup(...);
 
     // Act - Call the method under test
-    var result = await GroupService.UpdateAsync(groupId, request, currentUserId);
+    GroupResponse result = await GroupService.UpdateAsync(groupId, request, currentUserId);
 
     // Assert - Verify the results
     Assert.NotNull(result);

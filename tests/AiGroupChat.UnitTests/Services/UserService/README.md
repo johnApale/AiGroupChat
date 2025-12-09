@@ -63,11 +63,11 @@ All tests follow the AAA pattern:
 public async Task WithValidId_ReturnsUserResponse()
 {
     // Arrange - Set up mocks and test data
-    var user = new User { ... };
+    User user = new User { ... };
     UserRepositoryMock.Setup(...);
 
     // Act - Call the method under test
-    var result = await UserService.GetByIdAsync(user.Id);
+    UserResponse result = await UserService.GetByIdAsync(user.Id);
 
     // Assert - Verify the results
     Assert.NotNull(result);

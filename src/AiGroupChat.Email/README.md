@@ -80,7 +80,7 @@ public class AuthService
 
     public async Task SendConfirmation(string email, string name, string token)
     {
-        var result = await _emailService.SendConfirmationEmailAsync(email, name, token);
+        EmailResult result = await _emailService.SendConfirmationEmailAsync(email, name, token);
 
         if (!result.IsSuccess)
         {
