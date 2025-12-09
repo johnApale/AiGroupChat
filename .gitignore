@@ -35,6 +35,9 @@ appsettings.Development.json
 # macOS
 .DS_Store
 
+# Copilot instructions (local only)
+.github/copilot-instructions.md
+
 # Logs
 *.log
 logs/
