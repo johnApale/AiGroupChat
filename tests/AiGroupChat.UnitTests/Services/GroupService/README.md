@@ -6,13 +6,14 @@ Unit tests for the `GroupService` class which handles group CRUD operations and 
 
 ```
 GroupService/
-├── GroupServiceTestBase.cs     # Shared test setup and mocks
-├── CreateAsyncTests.cs         # Create group tests
-├── GetMyGroupsAsyncTests.cs    # List user's groups tests
-├── GetByIdAsyncTests.cs        # Get group by ID tests
-├── UpdateAsyncTests.cs         # Update group tests
-├── DeleteAsyncTests.cs         # Delete group tests
-└── README.md                   # This file
+├── GroupServiceTestBase.cs          # Shared test setup and mocks
+├── CreateAsyncTests.cs              # Create group tests
+├── GetMyGroupsAsyncTests.cs         # List user's groups tests
+├── GetByIdAsyncTests.cs             # Get group by ID tests
+├── UpdateAsyncTests.cs              # Update group tests
+├── DeleteAsyncTests.cs              # Delete group tests
+├── UpdateAiSettingsAsyncTests.cs    # Update AI settings tests
+└── README.md                        # This file
 ```
 
 ## Test Base Class
@@ -28,15 +29,16 @@ All test classes inherit from this base class.
 
 ## Test Coverage
 
-| File                       | Tests | Scenarios Covered                                                                   |
-| -------------------------- | ----- | ----------------------------------------------------------------------------------- |
-| `CreateAsyncTests.cs`      | 4     | Valid creation, creator becomes owner, assigns default provider, no providers error |
-| `GetMyGroupsAsyncTests.cs` | 2     | Returns groups, returns empty list                                                  |
-| `GetByIdAsyncTests.cs`     | 3     | Valid member access, nonexistent group, non-member                                  |
-| `UpdateAsyncTests.cs`      | 3     | Valid admin update, nonexistent group, non-admin                                    |
-| `DeleteAsyncTests.cs`      | 3     | Valid owner delete, nonexistent group, non-owner                                    |
+| File                            | Tests | Scenarios Covered                                                                                              |
+| ------------------------------- | ----- | -------------------------------------------------------------------------------------------------------------- |
+| `CreateAsyncTests.cs`           | 4     | Valid creation, creator becomes owner, assigns default provider, no providers error                            |
+| `GetMyGroupsAsyncTests.cs`      | 2     | Returns groups, returns empty list                                                                             |
+| `GetByIdAsyncTests.cs`          | 3     | Valid member access, nonexistent group, non-member                                                             |
+| `UpdateAsyncTests.cs`           | 3     | Valid admin update, nonexistent group, non-admin                                                               |
+| `DeleteAsyncTests.cs`           | 3     | Valid owner delete, nonexistent group, non-owner                                                               |
+| `UpdateAiSettingsAsyncTests.cs` | 7     | Update monitoring, update provider, update both, nonexistent group, non-admin, invalid provider, empty request |
 
-**Total: 15 tests**
+**Total: 22 tests**
 
 ## Running Tests
 

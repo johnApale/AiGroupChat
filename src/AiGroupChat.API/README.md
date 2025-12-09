@@ -65,13 +65,14 @@ AiGroupChat.API/
 
 ## Group Endpoints
 
-| Method | Endpoint          | Description                    | Auth Required |
-| ------ | ----------------- | ------------------------------ | ------------- |
-| POST   | `/api/groups`     | Create group (become admin)    | Yes           |
-| GET    | `/api/groups`     | List my groups with members    | Yes           |
-| GET    | `/api/groups/:id` | Get group details with members | Yes (member)  |
-| PUT    | `/api/groups/:id` | Update group name              | Yes (admin)   |
-| DELETE | `/api/groups/:id` | Delete group                   | Yes (admin)   |
+| Method | Endpoint             | Description                    | Auth Required |
+| ------ | -------------------- | ------------------------------ | ------------- |
+| POST   | `/api/groups`        | Create group (become admin)    | Yes           |
+| GET    | `/api/groups`        | List my groups with members    | Yes           |
+| GET    | `/api/groups/:id`    | Get group details with members | Yes (member)  |
+| PUT    | `/api/groups/:id`    | Update group name              | Yes (admin)   |
+| DELETE | `/api/groups/:id`    | Delete group                   | Yes (admin)   |
+| PUT    | `/api/groups/:id/ai` | Update AI settings             | Yes (admin)   |
 
 ## Group Member Endpoints
 

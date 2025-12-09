@@ -124,6 +124,48 @@ public class GroupService : IGroupService
         await _groupRepository.DeleteAsync(group, cancellationToken);
     }
 
+    public async Task<GroupResponse> UpdateAiSettingsAsync(Guid groupId, UpdateAiSettingsRequest request, string currentUserId, CancellationToken cancellationToken = default)
+    {
+        var group = await _groupRepository.GetByIdAsync(groupId, cancellationToken);
+
+        if (group == null)
+        {
+            throw new NotFoundException("Group", groupId);
+        }
+
+        var isAdmin = await _groupRepository.IsAdminAsync(groupId, currentUserId, cancellationToken);
+
+        if (!isAdmin)
+        {
+            throw new AuthorizationException("Only group admins can update AI settings.");
+        }
+
+        // Update only the fields that were provided
+        if (request.AiMonitoringEnabled.HasValue)
+        {
+            group.AiMonitoringEnabled = request.AiMonitoringEnabled.Value;
+        }
+
+        if (request.AiProviderId.HasValue)
+        {
+            // Validate that the provider exists and is enabled
+            var provider = await _aiProviderRepository.GetByIdAsync(request.AiProviderId.Value, cancellationToken);
+            if (provider == null)
+            {
+                throw new ValidationException("The specified AI provider does not exist or is not enabled.");
+            }
+
+            group.AiProviderId = request.AiProviderId.Value;
+            group.AiProvider = provider;
+        }
+
+        group.UpdatedAt = DateTime.UtcNow;
+
+        await _groupRepository.UpdateAsync(group, cancellationToken);
+
+        return MapToResponse(group);
+    }
+
     private static GroupResponse MapToResponse(Group group)
     {
         return new GroupResponse

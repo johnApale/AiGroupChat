@@ -28,4 +28,9 @@ public interface IGroupService
     /// Delete a group (must be an admin)
     /// </summary>
     Task DeleteAsync(Guid groupId, string currentUserId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Update AI settings for a group (must be an admin)
+    /// </summary>
+    Task<GroupResponse> UpdateAiSettingsAsync(Guid groupId, UpdateAiSettingsRequest request, string currentUserId, CancellationToken cancellationToken = default);
 }

@@ -58,6 +58,7 @@ DTOs (Data Transfer Objects) define the shape of data for API requests and respo
 | `ForgotPasswordRequest`     | Password reset request input                 |
 | `ResetPasswordRequest`      | Password reset input                         |
 | `RefreshTokenRequest`       | Token refresh input                          |
+| `UpdateAiSettingsRequest`   | AI settings update input (partial)           |
 | `LogoutRequest`             | Logout input                                 |
 | `AuthResponse`              | Authentication response with tokens and user |
 | `MessageResponse`           | Simple message response                      |

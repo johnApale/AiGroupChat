@@ -87,4 +87,18 @@ public class GroupsController : ControllerBase
         await _groupService.DeleteAsync(id, userId, cancellationToken);
         return NoContent();
     }
+
+    [HttpPut("{id:guid}/ai")]
+    public async Task<IActionResult> UpdateAiSettings(Guid id, [FromBody] UpdateAiSettingsRequest request, CancellationToken cancellationToken)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized();
+        }
+
+        var result = await _groupService.UpdateAiSettingsAsync(id, request, userId, cancellationToken);
+        return Ok(result);
+    }
 }
