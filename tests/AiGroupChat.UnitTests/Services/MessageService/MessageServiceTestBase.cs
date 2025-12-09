@@ -9,6 +9,7 @@ public abstract class MessageServiceTestBase
 {
     protected readonly Mock<IMessageRepository> MessageRepositoryMock;
     protected readonly Mock<IGroupRepository> GroupRepositoryMock;
+    protected readonly Mock<IChatHubService> ChatHubServiceMock;
     protected readonly Application.Services.MessageService MessageService;
 
     protected readonly string TestUserId = "user-123";
@@ -21,6 +22,7 @@ public abstract class MessageServiceTestBase
     {
         MessageRepositoryMock = new Mock<IMessageRepository>();
         GroupRepositoryMock = new Mock<IGroupRepository>();
+        ChatHubServiceMock = new Mock<IChatHubService>();
 
         TestUser = new User
         {
@@ -62,7 +64,8 @@ public abstract class MessageServiceTestBase
 
         MessageService = new Application.Services.MessageService(
             MessageRepositoryMock.Object,
-            GroupRepositoryMock.Object);
+            GroupRepositoryMock.Object,
+            ChatHubServiceMock.Object);
     }
 
     protected Message CreateTestMessage(Guid? id = null, string? content = null, SenderType senderType = SenderType.User)

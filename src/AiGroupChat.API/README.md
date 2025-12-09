@@ -22,8 +22,12 @@ The API layer is the entry point for the application. It handles HTTP requests, 
 AiGroupChat.API/
 ├── Controllers/
 │   └── AuthController.cs
+├── Hubs/
+│   └── ChatHub.cs
 ├── Middleware/
 │   └── ExceptionHandlingMiddleware.cs
+├── Services/
+│   └── ChatHubService.cs
 ├── Properties/
 │   └── launchSettings.json
 ├── appsettings.json
@@ -43,6 +47,43 @@ AiGroupChat.API/
 | `GroupOwnerController`   | `/api/groups/:id/owner`    | Ownership transfer endpoint |
 | `AiProvidersController`  | `/api/ai-providers`        | AI provider endpoints       |
 | `MessagesController`     | `/api/groups/:id/messages` | Message endpoints           |
+
+## SignalR Hub
+
+| Hub       | Endpoint     | Purpose                               |
+| --------- | ------------ | ------------------------------------- |
+| `ChatHub` | `/hubs/chat` | Real-time messaging and notifications |
+
+### Client → Server Methods
+
+| Method                 | Parameters | Description                           |
+| ---------------------- | ---------- | ------------------------------------- |
+| `JoinGroup(groupId)`   | `Guid`     | Subscribe to group's real-time events |
+| `LeaveGroup(groupId)`  | `Guid`     | Unsubscribe from group events         |
+| `StartTyping(groupId)` | `Guid`     | Notify group that user started typing |
+| `StopTyping(groupId)`  | `Guid`     | Notify group that user stopped typing |
+
+### Server → Client Events
+
+| Event               | Payload                  | Description                    |
+| ------------------- | ------------------------ | ------------------------------ |
+| `MessageReceived`   | `MessageResponse`        | New message sent in group      |
+| `AiSettingsChanged` | `AiSettingsChangedEvent` | Group AI settings were updated |
+| `MemberAdded`       | `MemberAddedEvent`       | New member joined the group    |
+| `MemberRemoved`     | `MemberRemovedEvent`     | Member left or was removed     |
+| `MemberRoleChanged` | `MemberRoleChangedEvent` | Member's role was changed      |
+| `UserTyping`        | `UserTypingEvent`        | User started typing in group   |
+| `UserStoppedTyping` | `groupId, userId`        | User stopped typing            |
+
+### SignalR Authentication
+
+SignalR uses JWT authentication. Since WebSocket doesn't support headers, the token is passed via query string:
+
+```javascript
+const connection = new signalR.HubConnectionBuilder()
+  .withUrl("/hubs/chat?access_token=" + accessToken)
+  .build();
+```
 
 ## Authentication Endpoints
 

@@ -90,6 +90,7 @@ Interfaces define contracts that are implemented in other layers.
 | `IAiProviderService`    | Application    | AI provider listing and retrieval |
 | `IMessageRepository`    | Infrastructure | Message data access               |
 | `IMessageService`       | Application    | Message sending and retrieval     |
+| `IChatHubService`       | API            | SignalR real-time broadcasting    |
 
 ## Exceptions
 

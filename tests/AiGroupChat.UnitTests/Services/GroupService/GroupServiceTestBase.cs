@@ -8,6 +8,7 @@ public abstract class GroupServiceTestBase
 {
     protected readonly Mock<IGroupRepository> GroupRepositoryMock;
     protected readonly Mock<IAiProviderRepository> AiProviderRepositoryMock;
+    protected readonly Mock<IChatHubService> ChatHubServiceMock;
     protected readonly Application.Services.GroupService GroupService;
 
     // Default test provider
@@ -27,6 +28,7 @@ public abstract class GroupServiceTestBase
     {
         GroupRepositoryMock = new Mock<IGroupRepository>();
         AiProviderRepositoryMock = new Mock<IAiProviderRepository>();
+        ChatHubServiceMock = new Mock<IChatHubService>();
 
         // Default: return the default provider
         AiProviderRepositoryMock
@@ -35,6 +37,7 @@ public abstract class GroupServiceTestBase
 
         GroupService = new Application.Services.GroupService(
             GroupRepositoryMock.Object,
-            AiProviderRepositoryMock.Object);
+            AiProviderRepositoryMock.Object,
+            ChatHubServiceMock.Object);
     }
 }

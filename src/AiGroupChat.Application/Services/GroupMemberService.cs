@@ -10,11 +10,16 @@ public class GroupMemberService : IGroupMemberService
 {
     private readonly IGroupRepository _groupRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IChatHubService _chatHubService;
 
-    public GroupMemberService(IGroupRepository groupRepository, IUserRepository userRepository)
+    public GroupMemberService(
+        IGroupRepository groupRepository,
+        IUserRepository userRepository,
+        IChatHubService chatHubService)
     {
         _groupRepository = groupRepository;
         _userRepository = userRepository;
+        _chatHubService = chatHubService;
     }
 
     public async Task<GroupMemberResponse> AddMemberAsync(Guid groupId, AddMemberRequest request, string currentUserId, CancellationToken cancellationToken = default)
@@ -61,7 +66,12 @@ public class GroupMemberService : IGroupMemberService
 
         // Fetch the member with user data
         GroupMember? addedMember = await _groupRepository.GetMemberAsync(groupId, request.UserId, cancellationToken);
-        return MapToResponse(addedMember!);
+        GroupMemberResponse response = MapToResponse(addedMember!);
+
+        // Broadcast member added to group
+        await _chatHubService.BroadcastMemberAddedAsync(groupId, response, cancellationToken);
+
+        return response;
     }
 
     public async Task<List<GroupMemberResponse>> GetMembersAsync(Guid groupId, string currentUserId, CancellationToken cancellationToken = default)
@@ -121,6 +131,9 @@ public class GroupMemberService : IGroupMemberService
         member.Role = newRole;
         await _groupRepository.UpdateMemberAsync(member, cancellationToken);
 
+        // Broadcast role change to group
+        await _chatHubService.BroadcastMemberRoleChangedAsync(groupId, userId, newRole.ToString(), cancellationToken);
+
         return MapToResponse(member);
     }
 
@@ -162,6 +175,9 @@ public class GroupMemberService : IGroupMemberService
         }
 
         await _groupRepository.RemoveMemberAsync(member, cancellationToken);
+
+        // Broadcast member removed to group
+        await _chatHubService.BroadcastMemberRemovedAsync(groupId, userId, cancellationToken);
     }
 
     public async Task LeaveGroupAsync(Guid groupId, string currentUserId, CancellationToken cancellationToken = default)
@@ -187,6 +203,9 @@ public class GroupMemberService : IGroupMemberService
         }
 
         await _groupRepository.RemoveMemberAsync(member, cancellationToken);
+
+        // Broadcast member left to group
+        await _chatHubService.BroadcastMemberRemovedAsync(groupId, currentUserId, cancellationToken);
     }
 
     public async Task<GroupMemberResponse> TransferOwnershipAsync(Guid groupId, TransferOwnershipRequest request, string currentUserId, CancellationToken cancellationToken = default)
@@ -224,6 +243,10 @@ public class GroupMemberService : IGroupMemberService
 
         await _groupRepository.UpdateMemberAsync(currentMember, cancellationToken);
         await _groupRepository.UpdateMemberAsync(newOwnerMember, cancellationToken);
+
+        // Broadcast role changes to group
+        await _chatHubService.BroadcastMemberRoleChangedAsync(groupId, currentUserId, GroupRole.Admin.ToString(), cancellationToken);
+        await _chatHubService.BroadcastMemberRoleChangedAsync(groupId, request.NewOwnerUserId, GroupRole.Owner.ToString(), cancellationToken);
 
         // Return the new owner's member info
         GroupMember? updatedNewOwner = await _groupRepository.GetMemberAsync(groupId, request.NewOwnerUserId, cancellationToken);

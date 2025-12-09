@@ -11,11 +11,16 @@ public class MessageService : IMessageService
 {
     private readonly IMessageRepository _messageRepository;
     private readonly IGroupRepository _groupRepository;
+    private readonly IChatHubService _chatHubService;
 
-    public MessageService(IMessageRepository messageRepository, IGroupRepository groupRepository)
+    public MessageService(
+        IMessageRepository messageRepository,
+        IGroupRepository groupRepository,
+        IChatHubService chatHubService)
     {
         _messageRepository = messageRepository;
         _groupRepository = groupRepository;
+        _chatHubService = chatHubService;
     }
 
     public async Task<MessageResponse> SendMessageAsync(Guid groupId, SendMessageRequest request, string currentUserId, CancellationToken cancellationToken = default)
@@ -52,7 +57,12 @@ public class MessageService : IMessageService
         // Fetch the message with sender info
         Message? createdMessage = await _messageRepository.GetByIdAsync(message.Id, cancellationToken);
 
-        return MapToResponse(createdMessage!);
+        MessageResponse response = MapToResponse(createdMessage!);
+
+        // Broadcast to group members via SignalR
+        await _chatHubService.BroadcastMessageAsync(groupId, response, cancellationToken);
+
+        return response;
     }
 
     public async Task<PaginatedResponse<MessageResponse>> GetMessagesAsync(Guid groupId, string currentUserId, int page = 1, int pageSize = 50, CancellationToken cancellationToken = default)

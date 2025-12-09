@@ -1,5 +1,6 @@
 using AiGroupChat.Application.DTOs.AiProviders;
 using AiGroupChat.Application.DTOs.Groups;
+using AiGroupChat.Application.DTOs.SignalR;
 using AiGroupChat.Application.Exceptions;
 using AiGroupChat.Application.Interfaces;
 using AiGroupChat.Domain.Entities;
@@ -11,11 +12,16 @@ public class GroupService : IGroupService
 {
     private readonly IGroupRepository _groupRepository;
     private readonly IAiProviderRepository _aiProviderRepository;
+    private readonly IChatHubService _chatHubService;
 
-    public GroupService(IGroupRepository groupRepository, IAiProviderRepository aiProviderRepository)
+    public GroupService(
+        IGroupRepository groupRepository,
+        IAiProviderRepository aiProviderRepository,
+        IChatHubService chatHubService)
     {
         _groupRepository = groupRepository;
         _aiProviderRepository = aiProviderRepository;
+        _chatHubService = chatHubService;
     }
 
     public async Task<GroupResponse> CreateAsync(CreateGroupRequest request, string currentUserId, CancellationToken cancellationToken = default)
@@ -162,6 +168,16 @@ public class GroupService : IGroupService
         group.UpdatedAt = DateTime.UtcNow;
 
         await _groupRepository.UpdateAsync(group, cancellationToken);
+
+        // Broadcast AI settings change to group members
+        AiSettingsChangedEvent aiSettingsEvent = new AiSettingsChangedEvent
+        {
+            GroupId = groupId,
+            AiMonitoringEnabled = group.AiMonitoringEnabled,
+            AiProviderId = group.AiProviderId,
+            AiProviderName = group.AiProvider.DisplayName
+        };
+        await _chatHubService.BroadcastAiSettingsChangedAsync(groupId, aiSettingsEvent, cancellationToken);
 
         return MapToResponse(group);
     }
