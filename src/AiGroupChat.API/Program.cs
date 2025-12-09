@@ -20,45 +20,48 @@ builder.Services.AddSingleton<IConnectionTracker, ConnectionTracker>();
 builder.Services.AddScoped<IChatHubService, ChatHubService>();
 
 // JWT Authentication
-JwtSettings jwtSettings = builder.Configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>()!;
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtSettings.Issuer,
-        ValidAudience = jwtSettings.Audience,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret)),
-        ClockSkew = TimeSpan.Zero
-    };
+.AddJwtBearer();
 
-    // Configure JWT for SignalR WebSocket connections
-    // SignalR sends token via query string since WebSocket doesn't support headers
-    options.Events = new JwtBearerEvents
+// Configure JWT options separately (allows test configuration override)
+builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
+    .Configure<IConfiguration>((options, configuration) =>
     {
-        OnMessageReceived = context =>
+        JwtSettings jwtSettings = configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>()!;
+        
+        options.TokenValidationParameters = new TokenValidationParameters
         {
-            string? accessToken = context.Request.Query["access_token"];
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtSettings.Issuer,
+            ValidAudience = jwtSettings.Audience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret)),
+            ClockSkew = TimeSpan.Zero
+        };
 
-            // If the request is for the hub, extract token from query string
-            PathString path = context.HttpContext.Request.Path;
-            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs/chat"))
+        // Configure JWT for SignalR WebSocket connections
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
             {
-                context.Token = accessToken;
-            }
+                string? accessToken = context.Request.Query["access_token"];
 
-            return Task.CompletedTask;
-        }
-    };
-});
+                PathString path = context.HttpContext.Request.Path;
+                if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs/chat"))
+                {
+                    context.Token = accessToken;
+                }
+
+                return Task.CompletedTask;
+            }
+        };
+    });
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
@@ -84,3 +87,6 @@ app.MapControllers();
 app.MapHub<ChatHub>("/hubs/chat");
 
 app.Run();
+
+// Make Program class accessible for integration tests
+public partial class Program { }
