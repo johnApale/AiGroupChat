@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace AiGroupChat.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/groups")]
 [Authorize]
 public class GroupsController : ControllerBase
 {
