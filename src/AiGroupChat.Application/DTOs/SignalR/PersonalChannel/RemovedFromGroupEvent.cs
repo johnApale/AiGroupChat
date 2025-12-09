@@ -6,5 +6,6 @@ namespace AiGroupChat.Application.DTOs.SignalR.PersonalChannel;
 public class RemovedFromGroupEvent
 {
     public Guid GroupId { get; set; }
+    public string GroupName { get; set; } = string.Empty;
     public DateTime RemovedAt { get; set; }
 }

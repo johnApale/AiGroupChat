@@ -1,4 +1,5 @@
 using AiGroupChat.Application.DTOs.Groups;
+using AiGroupChat.Application.DTOs.SignalR.GroupChannel;
 using AiGroupChat.Application.DTOs.SignalR.PersonalChannel;
 using AiGroupChat.Application.Exceptions;
 using AiGroupChat.Application.Interfaces;
@@ -46,12 +47,17 @@ public class GroupMemberService : IGroupMemberService
             throw new NotFoundException("User", request.UserId);
         }
 
+        // Get the current user's info for the AddedByName field
+        User? currentUser = await _userRepository.FindByIdAsync(currentUserId, cancellationToken);
+
         // Check if user is already a member
         GroupMember? existingMember = await _groupRepository.GetMemberAsync(groupId, request.UserId, cancellationToken);
         if (existingMember != null)
         {
             throw new ValidationException("User is already a member of this group.");
         }
+
+        DateTime now = DateTime.UtcNow;
 
         // Add member
         GroupMember member = new GroupMember
@@ -60,7 +66,7 @@ public class GroupMemberService : IGroupMemberService
             GroupId = groupId,
             UserId = request.UserId,
             Role = GroupRole.Member,
-            JoinedAt = DateTime.UtcNow
+            JoinedAt = now
         };
 
         await _groupRepository.AddMemberAsync(member, cancellationToken);
@@ -69,14 +75,26 @@ public class GroupMemberService : IGroupMemberService
         GroupMember? addedMember = await _groupRepository.GetMemberAsync(groupId, request.UserId, cancellationToken);
         GroupMemberResponse response = MapToResponse(addedMember!);
 
-        // Broadcast member added to group (Group Channel - for active viewers)
-        await _chatHubService.BroadcastMemberAddedAsync(groupId, response, cancellationToken);
+        // Broadcast member joined to group (Group Channel - for active viewers)
+        MemberJoinedEvent memberJoinedEvent = new MemberJoinedEvent
+        {
+            GroupId = groupId,
+            UserId = request.UserId,
+            UserName = targetUser.UserName ?? string.Empty,
+            DisplayName = targetUser.DisplayName ?? string.Empty,
+            Role = GroupRole.Member.ToString(),
+            JoinedAt = now
+        };
+        await _chatHubService.BroadcastMemberJoinedAsync(groupId, memberJoinedEvent, cancellationToken);
 
         // Send personal channel notification to the added user
         AddedToGroupEvent addedEvent = new AddedToGroupEvent
         {
             GroupId = groupId,
-            AddedAt = DateTime.UtcNow
+            GroupName = group.Name,
+            AddedByName = currentUser?.DisplayName ?? currentUser?.UserName ?? string.Empty,
+            Role = GroupRole.Member.ToString(),
+            AddedAt = now
         };
         await _chatHubService.SendAddedToGroupAsync(request.UserId, addedEvent, cancellationToken);
 
@@ -118,6 +136,9 @@ public class GroupMemberService : IGroupMemberService
             throw new AuthorizationException("Only the group owner can change member roles.");
         }
 
+        // Get the current user's info for the ChangedByName field
+        User? currentUser = await _userRepository.FindByIdAsync(currentUserId, cancellationToken);
+
         // Verify target member exists
         GroupMember? member = await _groupRepository.GetMemberAsync(groupId, userId, cancellationToken);
         if (member == null)
@@ -137,17 +158,32 @@ public class GroupMemberService : IGroupMemberService
             throw new ValidationException("Invalid role. Must be 'Admin' or 'Member'.");
         }
 
+        string oldRole = member.Role.ToString();
         member.Role = newRole;
         await _groupRepository.UpdateMemberAsync(member, cancellationToken);
 
+        DateTime now = DateTime.UtcNow;
+
         // Broadcast role change to group (Group Channel - for active viewers)
-        await _chatHubService.BroadcastMemberRoleChangedAsync(groupId, userId, newRole.ToString(), cancellationToken);
+        MemberRoleChangedEvent memberRoleEvent = new MemberRoleChangedEvent
+        {
+            GroupId = groupId,
+            UserId = userId,
+            DisplayName = member.User?.DisplayName ?? member.User?.UserName ?? string.Empty,
+            OldRole = oldRole,
+            NewRole = newRole.ToString()
+        };
+        await _chatHubService.BroadcastMemberRoleChangedAsync(groupId, memberRoleEvent, cancellationToken);
 
         // Send personal channel notification to the user whose role changed
         RoleChangedEvent roleEvent = new RoleChangedEvent
         {
             GroupId = groupId,
-            ChangedAt = DateTime.UtcNow
+            GroupName = group.Name,
+            OldRole = oldRole,
+            NewRole = newRole.ToString(),
+            ChangedByName = currentUser?.DisplayName ?? currentUser?.UserName ?? string.Empty,
+            ChangedAt = now
         };
         await _chatHubService.SendRoleChangedAsync(userId, roleEvent, cancellationToken);
 
@@ -191,16 +227,29 @@ public class GroupMemberService : IGroupMemberService
             throw new AuthorizationException("Only the group owner can remove admins.");
         }
 
+        // Get user display name before removal
+        string displayName = member.User?.DisplayName ?? member.User?.UserName ?? string.Empty;
+
         await _groupRepository.RemoveMemberAsync(member, cancellationToken);
 
-        // Broadcast member removed to group (Group Channel - for active viewers)
-        await _chatHubService.BroadcastMemberRemovedAsync(groupId, userId, cancellationToken);
+        DateTime now = DateTime.UtcNow;
+
+        // Broadcast member left to group (Group Channel - for active viewers)
+        MemberLeftEvent memberLeftEvent = new MemberLeftEvent
+        {
+            GroupId = groupId,
+            UserId = userId,
+            DisplayName = displayName,
+            LeftAt = now
+        };
+        await _chatHubService.BroadcastMemberLeftAsync(groupId, memberLeftEvent, cancellationToken);
 
         // Send personal channel notification to the removed user
         RemovedFromGroupEvent removedEvent = new RemovedFromGroupEvent
         {
             GroupId = groupId,
-            RemovedAt = DateTime.UtcNow
+            GroupName = group.Name,
+            RemovedAt = now
         };
         await _chatHubService.SendRemovedFromGroupAsync(userId, removedEvent, cancellationToken);
     }
@@ -227,10 +276,20 @@ public class GroupMemberService : IGroupMemberService
             throw new ValidationException("Owner cannot leave the group. Transfer ownership first or delete the group.");
         }
 
+        // Get user display name before removal
+        string displayName = member.User?.DisplayName ?? member.User?.UserName ?? string.Empty;
+
         await _groupRepository.RemoveMemberAsync(member, cancellationToken);
 
         // Broadcast member left to group
-        await _chatHubService.BroadcastMemberRemovedAsync(groupId, currentUserId, cancellationToken);
+        MemberLeftEvent memberLeftEvent = new MemberLeftEvent
+        {
+            GroupId = groupId,
+            UserId = currentUserId,
+            DisplayName = displayName,
+            LeftAt = DateTime.UtcNow
+        };
+        await _chatHubService.BroadcastMemberLeftAsync(groupId, memberLeftEvent, cancellationToken);
     }
 
     public async Task<GroupMemberResponse> TransferOwnershipAsync(Guid groupId, TransferOwnershipRequest request, string currentUserId, CancellationToken cancellationToken = default)
@@ -262,6 +321,10 @@ public class GroupMemberService : IGroupMemberService
             throw new ValidationException("Cannot transfer ownership to yourself.");
         }
 
+        // Store old roles before update
+        string currentUserOldRole = currentMember.Role.ToString();
+        string newOwnerOldRole = newOwnerMember.Role.ToString();
+
         // Transfer ownership
         currentMember.Role = GroupRole.Admin;
         newOwnerMember.Role = GroupRole.Owner;
@@ -270,8 +333,25 @@ public class GroupMemberService : IGroupMemberService
         await _groupRepository.UpdateMemberAsync(newOwnerMember, cancellationToken);
 
         // Broadcast role changes to group
-        await _chatHubService.BroadcastMemberRoleChangedAsync(groupId, currentUserId, GroupRole.Admin.ToString(), cancellationToken);
-        await _chatHubService.BroadcastMemberRoleChangedAsync(groupId, request.NewOwnerUserId, GroupRole.Owner.ToString(), cancellationToken);
+        MemberRoleChangedEvent currentUserRoleEvent = new MemberRoleChangedEvent
+        {
+            GroupId = groupId,
+            UserId = currentUserId,
+            DisplayName = currentMember.User?.DisplayName ?? currentMember.User?.UserName ?? string.Empty,
+            OldRole = currentUserOldRole,
+            NewRole = GroupRole.Admin.ToString()
+        };
+        await _chatHubService.BroadcastMemberRoleChangedAsync(groupId, currentUserRoleEvent, cancellationToken);
+
+        MemberRoleChangedEvent newOwnerRoleEvent = new MemberRoleChangedEvent
+        {
+            GroupId = groupId,
+            UserId = request.NewOwnerUserId,
+            DisplayName = newOwnerMember.User?.DisplayName ?? newOwnerMember.User?.UserName ?? string.Empty,
+            OldRole = newOwnerOldRole,
+            NewRole = GroupRole.Owner.ToString()
+        };
+        await _chatHubService.BroadcastMemberRoleChangedAsync(groupId, newOwnerRoleEvent, cancellationToken);
 
         // Return the new owner's member info
         GroupMember? updatedNewOwner = await _groupRepository.GetMemberAsync(groupId, request.NewOwnerUserId, cancellationToken);

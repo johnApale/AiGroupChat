@@ -70,15 +70,28 @@ public class MessageService : IMessageService
         List<string> memberIds = await _groupMemberRepository.GetGroupMemberIdsAsync(groupId, cancellationToken);
         List<string> otherMemberIds = memberIds.Where(id => id != currentUserId).ToList();
 
+        string senderName = createdMessage!.Sender?.DisplayName ?? createdMessage.Sender?.UserName ?? "Unknown";
+        string preview = createdMessage.Content.Length > 50
+            ? createdMessage.Content.Substring(0, 50) + "..."
+            : createdMessage.Content;
+
         GroupActivityEvent activityEvent = new GroupActivityEvent
         {
             GroupId = groupId,
-            ActorName = createdMessage!.Sender?.DisplayName ?? createdMessage.Sender?.UserName
+            GroupName = group.Name,
+            ActivityType = "NewMessage",
+            Timestamp = now,
+            Preview = $"{senderName}: {preview}",
+            ActorName = senderName
         };
 
         NewMessageNotificationEvent notificationEvent = new NewMessageNotificationEvent
         {
             GroupId = groupId,
+            GroupName = group.Name,
+            MessageId = createdMessage.Id,
+            SenderName = senderName,
+            Preview = preview,
             SentAt = now
         };
 

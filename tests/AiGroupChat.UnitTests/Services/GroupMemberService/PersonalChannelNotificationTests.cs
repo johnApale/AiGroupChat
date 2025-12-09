@@ -1,19 +1,19 @@
 using AiGroupChat.Application.DTOs.Groups;
-using AiGroupChat.Application.DTOs.SignalR.GroupChannel;
+using AiGroupChat.Application.DTOs.SignalR.PersonalChannel;
 using AiGroupChat.Domain.Entities;
 using AiGroupChat.Domain.Enums;
 using Moq;
 
 namespace AiGroupChat.UnitTests.Services.GroupMemberService;
 
-public class MemberBroadcastTests : GroupMemberServiceTestBase
+public class PersonalChannelNotificationTests : GroupMemberServiceTestBase
 {
     private readonly Guid _groupId = Guid.NewGuid();
     private readonly string _ownerId = "owner-id";
     private readonly string _memberId = "member-id";
 
     [Fact]
-    public async Task AddMemberAsync_BroadcastsMemberJoined()
+    public async Task AddMemberAsync_SendsAddedToGroupNotification()
     {
         // Arrange
         string newUserId = "new-user-id";
@@ -78,18 +78,19 @@ public class MemberBroadcastTests : GroupMemberServiceTestBase
 
         // Assert
         ChatHubServiceMock.Verify(
-            x => x.BroadcastMemberJoinedAsync(
-                _groupId,
-                It.Is<MemberJoinedEvent>(e => 
-                    e.UserId == newUserId && 
-                    e.Role == "Member" &&
-                    e.DisplayName == "New User"),
+            x => x.SendAddedToGroupAsync(
+                newUserId,
+                It.Is<AddedToGroupEvent>(e => 
+                    e.GroupId == _groupId &&
+                    e.GroupName == "Test Group" &&
+                    e.AddedByName == "Owner User" &&
+                    e.Role == "Member"),
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
     [Fact]
-    public async Task RemoveMemberAsync_BroadcastsMemberLeft()
+    public async Task RemoveMemberAsync_SendsRemovedFromGroupNotification()
     {
         // Arrange
         User memberUser = new User
@@ -135,19 +136,87 @@ public class MemberBroadcastTests : GroupMemberServiceTestBase
 
         // Assert
         ChatHubServiceMock.Verify(
-            x => x.BroadcastMemberLeftAsync(
-                _groupId, 
-                It.Is<MemberLeftEvent>(e => 
-                    e.UserId == _memberId &&
-                    e.DisplayName == "Member User"),
+            x => x.SendRemovedFromGroupAsync(
+                _memberId,
+                It.Is<RemovedFromGroupEvent>(e => 
+                    e.GroupId == _groupId &&
+                    e.GroupName == "Test Group"),
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
     [Fact]
-    public async Task LeaveGroupAsync_BroadcastsMemberLeft()
+    public async Task UpdateMemberRoleAsync_SendsRoleChangedNotification()
     {
         // Arrange
+        User ownerUser = new User
+        {
+            Id = _ownerId,
+            UserName = "owner",
+            DisplayName = "Owner User"
+        };
+
+        User memberUser = new User
+        {
+            Id = _memberId,
+            UserName = "member",
+            DisplayName = "Member User"
+        };
+
+        Group group = new Group
+        {
+            Id = _groupId,
+            Name = "Test Group",
+            Members = new List<GroupMember>()
+        };
+
+        GroupMember member = new GroupMember
+        {
+            UserId = _memberId,
+            Role = GroupRole.Member,
+            JoinedAt = DateTime.UtcNow.AddDays(-1),
+            User = memberUser
+        };
+
+        UpdateMemberRoleRequest request = new UpdateMemberRoleRequest { Role = "Admin" };
+
+        GroupRepositoryMock
+            .Setup(x => x.GetByIdAsync(_groupId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(group);
+
+        GroupRepositoryMock
+            .Setup(x => x.IsOwnerAsync(_groupId, _ownerId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
+        GroupRepositoryMock
+            .Setup(x => x.GetMemberAsync(_groupId, _memberId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(member);
+
+        UserRepositoryMock
+            .Setup(x => x.FindByIdAsync(_ownerId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(ownerUser);
+
+        // Act
+        await GroupMemberService.UpdateMemberRoleAsync(_groupId, _memberId, request, _ownerId);
+
+        // Assert
+        ChatHubServiceMock.Verify(
+            x => x.SendRoleChangedAsync(
+                _memberId,
+                It.Is<RoleChangedEvent>(e => 
+                    e.GroupId == _groupId &&
+                    e.GroupName == "Test Group" &&
+                    e.OldRole == "Member" &&
+                    e.NewRole == "Admin" &&
+                    e.ChangedByName == "Owner User"),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task LeaveGroupAsync_DoesNotSendPersonalNotification()
+    {
+        // Arrange - when a user leaves voluntarily, they don't need a notification
         User memberUser = new User
         {
             Id = _memberId,
@@ -181,140 +250,12 @@ public class MemberBroadcastTests : GroupMemberServiceTestBase
         // Act
         await GroupMemberService.LeaveGroupAsync(_groupId, _memberId);
 
-        // Assert
+        // Assert - no personal notification for voluntary leave
         ChatHubServiceMock.Verify(
-            x => x.BroadcastMemberLeftAsync(
-                _groupId, 
-                It.Is<MemberLeftEvent>(e => 
-                    e.UserId == _memberId &&
-                    e.DisplayName == "Member User"),
+            x => x.SendRemovedFromGroupAsync(
+                It.IsAny<string>(),
+                It.IsAny<RemovedFromGroupEvent>(),
                 It.IsAny<CancellationToken>()),
-            Times.Once);
-    }
-
-    [Fact]
-    public async Task UpdateMemberRoleAsync_BroadcastsMemberRoleChanged()
-    {
-        // Arrange
-        User ownerUser = new User
-        {
-            Id = _ownerId,
-            UserName = "owner",
-            DisplayName = "Owner User"
-        };
-
-        Group group = new Group
-        {
-            Id = _groupId,
-            Name = "Test Group",
-            Members = new List<GroupMember>()
-        };
-
-        GroupMember member = new GroupMember
-        {
-            UserId = _memberId,
-            Role = GroupRole.Member,
-            JoinedAt = DateTime.UtcNow.AddDays(-1),
-            User = new User { Id = _memberId, UserName = "member", DisplayName = "Member" }
-        };
-
-        UpdateMemberRoleRequest request = new UpdateMemberRoleRequest { Role = "Admin" };
-
-        GroupRepositoryMock
-            .Setup(x => x.GetByIdAsync(_groupId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(group);
-
-        GroupRepositoryMock
-            .Setup(x => x.IsOwnerAsync(_groupId, _ownerId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(true);
-
-        GroupRepositoryMock
-            .Setup(x => x.GetMemberAsync(_groupId, _memberId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(member);
-
-        UserRepositoryMock
-            .Setup(x => x.FindByIdAsync(_ownerId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(ownerUser);
-
-        // Act
-        await GroupMemberService.UpdateMemberRoleAsync(_groupId, _memberId, request, _ownerId);
-
-        // Assert
-        ChatHubServiceMock.Verify(
-            x => x.BroadcastMemberRoleChangedAsync(
-                _groupId, 
-                It.Is<MemberRoleChangedEvent>(e => 
-                    e.UserId == _memberId && 
-                    e.OldRole == "Member" &&
-                    e.NewRole == "Admin"),
-                It.IsAny<CancellationToken>()),
-            Times.Once);
-    }
-
-    [Fact]
-    public async Task TransferOwnershipAsync_BroadcastsRoleChangesForBothUsers()
-    {
-        // Arrange
-        string newOwnerId = "new-owner-id";
-        Group group = new Group
-        {
-            Id = _groupId,
-            Name = "Test Group",
-            Members = new List<GroupMember>()
-        };
-
-        GroupMember currentOwnerMember = new GroupMember
-        {
-            UserId = _ownerId,
-            Role = GroupRole.Owner,
-            JoinedAt = DateTime.UtcNow.AddDays(-7),
-            User = new User { Id = _ownerId, UserName = "owner", DisplayName = "Current Owner" }
-        };
-
-        GroupMember newOwnerMember = new GroupMember
-        {
-            UserId = newOwnerId,
-            Role = GroupRole.Admin,
-            JoinedAt = DateTime.UtcNow.AddDays(-1),
-            User = new User { Id = newOwnerId, UserName = "newowner", DisplayName = "New Owner" }
-        };
-
-        TransferOwnershipRequest request = new TransferOwnershipRequest { NewOwnerUserId = newOwnerId };
-
-        GroupRepositoryMock
-            .Setup(x => x.GetByIdAsync(_groupId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(group);
-
-        GroupRepositoryMock
-            .Setup(x => x.GetMemberAsync(_groupId, _ownerId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(currentOwnerMember);
-
-        GroupRepositoryMock
-            .Setup(x => x.GetMemberAsync(_groupId, newOwnerId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(newOwnerMember);
-
-        // Act
-        await GroupMemberService.TransferOwnershipAsync(_groupId, request, _ownerId);
-
-        // Assert - both role changes should be broadcast
-        ChatHubServiceMock.Verify(
-            x => x.BroadcastMemberRoleChangedAsync(
-                _groupId, 
-                It.Is<MemberRoleChangedEvent>(e => 
-                    e.UserId == _ownerId && 
-                    e.OldRole == "Owner" &&
-                    e.NewRole == "Admin"),
-                It.IsAny<CancellationToken>()),
-            Times.Once);
-
-        ChatHubServiceMock.Verify(
-            x => x.BroadcastMemberRoleChangedAsync(
-                _groupId, 
-                It.Is<MemberRoleChangedEvent>(e => 
-                    e.UserId == newOwnerId && 
-                    e.OldRole == "Admin" &&
-                    e.NewRole == "Owner"),
-                It.IsAny<CancellationToken>()),
-            Times.Once);
+            Times.Never);
     }
 }

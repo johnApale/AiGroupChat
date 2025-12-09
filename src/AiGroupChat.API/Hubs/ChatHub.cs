@@ -107,7 +107,13 @@ public class ChatHub : Hub
             return; // Silently ignore if not a member
         }
 
-        await Clients.OthersInGroup(GetGroupName(groupId)).SendAsync("UserStoppedTyping", groupId, userId);
+        UserStoppedTypingEvent stoppedTypingEvent = new UserStoppedTypingEvent
+        {
+            GroupId = groupId,
+            UserId = userId
+        };
+
+        await Clients.OthersInGroup(GetGroupName(groupId)).SendAsync("UserStoppedTyping", stoppedTypingEvent);
     }
 
     public override async Task OnConnectedAsync()
@@ -125,6 +131,9 @@ public class ChatHub : Hub
         {
             _logger.LogInformation("User {UserId} came online (first connection)", userId);
 
+            // Get user info for the event
+            Domain.Entities.User? user = await _userRepository.FindByIdAsync(userId);
+
             // Get all users who share groups with this user
             List<string> sharedUserIds = await _groupMemberRepository.GetUsersWhoShareGroupsWithAsync(userId);
 
@@ -133,6 +142,7 @@ public class ChatHub : Hub
                 UserOnlineEvent onlineEvent = new UserOnlineEvent
                 {
                     UserId = userId,
+                    DisplayName = user?.DisplayName ?? user?.UserName ?? string.Empty,
                     OnlineAt = DateTime.UtcNow
                 };
 
@@ -155,6 +165,9 @@ public class ChatHub : Hub
         {
             _logger.LogInformation("User {UserId} went offline (last connection closed)", userId);
 
+            // Get user info for the event
+            Domain.Entities.User? user = await _userRepository.FindByIdAsync(userId);
+
             // Get all users who share groups with this user
             List<string> sharedUserIds = await _groupMemberRepository.GetUsersWhoShareGroupsWithAsync(userId);
 
@@ -163,6 +176,7 @@ public class ChatHub : Hub
                 UserOfflineEvent offlineEvent = new UserOfflineEvent
                 {
                     UserId = userId,
+                    DisplayName = user?.DisplayName ?? user?.UserName ?? string.Empty,
                     OfflineAt = DateTime.UtcNow
                 };
 

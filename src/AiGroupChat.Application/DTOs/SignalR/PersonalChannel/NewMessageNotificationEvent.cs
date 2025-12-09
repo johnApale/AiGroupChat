@@ -7,5 +7,9 @@ namespace AiGroupChat.Application.DTOs.SignalR.PersonalChannel;
 public class NewMessageNotificationEvent
 {
     public Guid GroupId { get; set; }
+    public string GroupName { get; set; } = string.Empty;
+    public Guid MessageId { get; set; }
+    public string SenderName { get; set; } = string.Empty;
+    public string Preview { get; set; } = string.Empty;
     public DateTime SentAt { get; set; }
 }

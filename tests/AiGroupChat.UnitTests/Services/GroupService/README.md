@@ -6,14 +6,15 @@ Unit tests for the `GroupService` class which handles group CRUD operations and 
 
 ```
 GroupService/
-├── GroupServiceTestBase.cs          # Shared test setup and mocks
-├── CreateAsyncTests.cs              # Create group tests
-├── GetMyGroupsAsyncTests.cs         # List user's groups tests
-├── GetByIdAsyncTests.cs             # Get group by ID tests
-├── UpdateAsyncTests.cs              # Update group tests
-├── DeleteAsyncTests.cs              # Delete group tests
-├── UpdateAiSettingsAsyncTests.cs    # Update AI settings tests
-└── README.md                        # This file
+├── GroupServiceTestBase.cs              # Shared test setup and mocks
+├── CreateAsyncTests.cs                  # Create group tests
+├── GetMyGroupsAsyncTests.cs             # List user's groups tests
+├── GetByIdAsyncTests.cs                 # Get group by ID tests
+├── UpdateAsyncTests.cs                  # Update group tests
+├── DeleteAsyncTests.cs                  # Delete group tests
+├── UpdateAiSettingsAsyncTests.cs        # Update AI settings tests
+├── UpdateAiSettingsBroadcastTests.cs    # SignalR broadcast tests for AI settings
+└── README.md                            # This file
 ```
 
 ## Test Base Class
@@ -22,6 +23,8 @@ GroupService/
 
 - `GroupRepositoryMock` - Mocked `IGroupRepository`
 - `AiProviderRepositoryMock` - Mocked `IAiProviderRepository`
+- `UserRepositoryMock` - Mocked `IUserRepository`
+- `ChatHubServiceMock` - Mocked `IChatHubService`
 - `DefaultAiProvider` - Test AI provider for group creation
 - `GroupService` - Instance under test with mocked dependencies
 
@@ -29,16 +32,17 @@ All test classes inherit from this base class.
 
 ## Test Coverage
 
-| File                            | Tests | Scenarios Covered                                                                                              |
-| ------------------------------- | ----- | -------------------------------------------------------------------------------------------------------------- |
-| `CreateAsyncTests.cs`           | 4     | Valid creation, creator becomes owner, assigns default provider, no providers error                            |
-| `GetMyGroupsAsyncTests.cs`      | 2     | Returns groups, returns empty list                                                                             |
-| `GetByIdAsyncTests.cs`          | 3     | Valid member access, nonexistent group, non-member                                                             |
-| `UpdateAsyncTests.cs`           | 3     | Valid admin update, nonexistent group, non-admin                                                               |
-| `DeleteAsyncTests.cs`           | 3     | Valid owner delete, nonexistent group, non-owner                                                               |
-| `UpdateAiSettingsAsyncTests.cs` | 7     | Update monitoring, update provider, update both, nonexistent group, non-admin, invalid provider, empty request |
+| File                                | Tests | Scenarios Covered                                                                                              |
+| ----------------------------------- | ----- | -------------------------------------------------------------------------------------------------------------- |
+| `CreateAsyncTests.cs`               | 4     | Valid creation, creator becomes owner, assigns default provider, no providers error                            |
+| `GetMyGroupsAsyncTests.cs`          | 2     | Returns groups, returns empty list                                                                             |
+| `GetByIdAsyncTests.cs`              | 3     | Valid member access, nonexistent group, non-member                                                             |
+| `UpdateAsyncTests.cs`               | 3     | Valid admin update, nonexistent group, non-admin                                                               |
+| `DeleteAsyncTests.cs`               | 3     | Valid owner delete, nonexistent group, non-owner                                                               |
+| `UpdateAiSettingsAsyncTests.cs`     | 7     | Update monitoring, update provider, update both, nonexistent group, non-admin, invalid provider, empty request |
+| `UpdateAiSettingsBroadcastTests.cs` | 2     | Broadcasts AiSettingsChanged, includes ChangedByName and ChangedAt                                             |
 
-**Total: 22 tests**
+**Total: 24 tests**
 
 ## Running Tests
 
@@ -51,6 +55,7 @@ dotnet test --filter "FullyQualifiedName~GroupService"
 
 # Run specific test file
 dotnet test --filter "FullyQualifiedName~CreateAsyncTests"
+dotnet test --filter "FullyQualifiedName~UpdateAiSettingsBroadcastTests"
 
 # Run a single test
 dotnet test --filter "FullyQualifiedName~CreateAsyncTests.WithValidRequest_CreatesGroupAndReturnsResponse"
@@ -88,6 +93,15 @@ public async Task WithValidRequestAndAdmin_UpdatesAndReturnsGroup()
     Assert.Equal(request.Name, result.Name);
 }
 ```
+
+## SignalR Broadcast Tests
+
+### AiSettingsChanged Event (UpdateAiSettingsBroadcastTests)
+
+| Test                                                  | Verifies                                                    |
+| ----------------------------------------------------- | ----------------------------------------------------------- |
+| `UpdateAiSettingsAsync_BroadcastsAiSettingsChanged`   | Event sent with GroupId, AiMonitoringEnabled, ChangedByName |
+| `UpdateAiSettingsAsync_BroadcastsCorrectProviderInfo` | Event includes AiProviderId, AiProviderName, ChangedAt      |
 
 ## Authorization Tests
 

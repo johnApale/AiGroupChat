@@ -1,5 +1,4 @@
 using AiGroupChat.API.Hubs;
-using AiGroupChat.Application.DTOs.Groups;
 using AiGroupChat.Application.DTOs.Messages;
 using AiGroupChat.Application.DTOs.SignalR.GroupChannel;
 using AiGroupChat.Application.DTOs.SignalR.PersonalChannel;
@@ -33,44 +32,25 @@ public class ChatHubService : IChatHubService
             .SendAsync("AiSettingsChanged", settings, cancellationToken);
     }
 
-    public async Task BroadcastMemberAddedAsync(Guid groupId, GroupMemberResponse member, CancellationToken cancellationToken = default)
+    public async Task BroadcastMemberJoinedAsync(Guid groupId, MemberJoinedEvent eventData, CancellationToken cancellationToken = default)
     {
-        MemberAddedEvent memberEvent = new MemberAddedEvent
-        {
-            GroupId = groupId,
-            Member = member
-        };
-
         await _hubContext.Clients
             .Group(GetGroupName(groupId))
-            .SendAsync("MemberAdded", memberEvent, cancellationToken);
+            .SendAsync("MemberJoined", eventData, cancellationToken);
     }
 
-    public async Task BroadcastMemberRemovedAsync(Guid groupId, string userId, CancellationToken cancellationToken = default)
+    public async Task BroadcastMemberLeftAsync(Guid groupId, MemberLeftEvent eventData, CancellationToken cancellationToken = default)
     {
-        MemberRemovedEvent memberEvent = new MemberRemovedEvent
-        {
-            GroupId = groupId,
-            UserId = userId
-        };
-
         await _hubContext.Clients
             .Group(GetGroupName(groupId))
-            .SendAsync("MemberRemoved", memberEvent, cancellationToken);
+            .SendAsync("MemberLeft", eventData, cancellationToken);
     }
 
-    public async Task BroadcastMemberRoleChangedAsync(Guid groupId, string userId, string newRole, CancellationToken cancellationToken = default)
+    public async Task BroadcastMemberRoleChangedAsync(Guid groupId, MemberRoleChangedEvent eventData, CancellationToken cancellationToken = default)
     {
-        MemberRoleChangedEvent roleEvent = new MemberRoleChangedEvent
-        {
-            GroupId = groupId,
-            UserId = userId,
-            NewRole = newRole
-        };
-
         await _hubContext.Clients
             .Group(GetGroupName(groupId))
-            .SendAsync("MemberRoleChanged", roleEvent, cancellationToken);
+            .SendAsync("MemberRoleChanged", eventData, cancellationToken);
     }
 
     public async Task BroadcastUserTypingAsync(Guid groupId, UserTypingEvent typingEvent, CancellationToken cancellationToken = default)
@@ -80,11 +60,11 @@ public class ChatHubService : IChatHubService
             .SendAsync("UserTyping", typingEvent, cancellationToken);
     }
 
-    public async Task BroadcastUserStoppedTypingAsync(Guid groupId, string userId, CancellationToken cancellationToken = default)
+    public async Task BroadcastUserStoppedTypingAsync(Guid groupId, UserStoppedTypingEvent eventData, CancellationToken cancellationToken = default)
     {
         await _hubContext.Clients
             .Group(GetGroupName(groupId))
-            .SendAsync("UserStoppedTyping", groupId, userId, cancellationToken);
+            .SendAsync("UserStoppedTyping", eventData, cancellationToken);
     }
 
     #region Personal Channel Events

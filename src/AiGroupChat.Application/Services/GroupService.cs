@@ -12,15 +12,18 @@ public class GroupService : IGroupService
 {
     private readonly IGroupRepository _groupRepository;
     private readonly IAiProviderRepository _aiProviderRepository;
+    private readonly IUserRepository _userRepository;
     private readonly IChatHubService _chatHubService;
 
     public GroupService(
         IGroupRepository groupRepository,
         IAiProviderRepository aiProviderRepository,
+        IUserRepository userRepository,
         IChatHubService chatHubService)
     {
         _groupRepository = groupRepository;
         _aiProviderRepository = aiProviderRepository;
+        _userRepository = userRepository;
         _chatHubService = chatHubService;
     }
 
@@ -146,6 +149,9 @@ public class GroupService : IGroupService
             throw new AuthorizationException("Only group admins can update AI settings.");
         }
 
+        // Get current user info for ChangedByName
+        User? currentUser = await _userRepository.FindByIdAsync(currentUserId, cancellationToken);
+
         // Update only the fields that were provided
         if (request.AiMonitoringEnabled.HasValue)
         {
@@ -165,7 +171,8 @@ public class GroupService : IGroupService
             group.AiProvider = provider;
         }
 
-        group.UpdatedAt = DateTime.UtcNow;
+        DateTime now = DateTime.UtcNow;
+        group.UpdatedAt = now;
 
         await _groupRepository.UpdateAsync(group, cancellationToken);
 
@@ -175,7 +182,9 @@ public class GroupService : IGroupService
             GroupId = groupId,
             AiMonitoringEnabled = group.AiMonitoringEnabled,
             AiProviderId = group.AiProviderId,
-            AiProviderName = group.AiProvider.DisplayName
+            AiProviderName = group.AiProvider?.DisplayName,
+            ChangedByName = currentUser?.DisplayName ?? currentUser?.UserName ?? string.Empty,
+            ChangedAt = now
         };
         await _chatHubService.BroadcastAiSettingsChangedAsync(groupId, aiSettingsEvent, cancellationToken);
 

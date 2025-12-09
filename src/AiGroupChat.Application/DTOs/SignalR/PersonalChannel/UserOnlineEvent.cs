@@ -6,5 +6,6 @@ namespace AiGroupChat.Application.DTOs.SignalR.PersonalChannel;
 public class UserOnlineEvent
 {
     public string UserId { get; set; } = string.Empty;
+    public string DisplayName { get; set; } = string.Empty;
     public DateTime OnlineAt { get; set; }
 }

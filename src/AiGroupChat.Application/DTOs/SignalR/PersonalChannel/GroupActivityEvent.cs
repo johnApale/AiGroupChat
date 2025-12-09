@@ -7,5 +7,9 @@ namespace AiGroupChat.Application.DTOs.SignalR.PersonalChannel;
 public class GroupActivityEvent
 {
     public Guid GroupId { get; set; }
+    public string GroupName { get; set; } = string.Empty;
+    public string ActivityType { get; set; } = string.Empty;
+    public DateTime Timestamp { get; set; }
+    public string? Preview { get; set; }
     public string? ActorName { get; set; }
 }

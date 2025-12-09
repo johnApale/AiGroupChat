@@ -1,4 +1,3 @@
-using AiGroupChat.Application.DTOs.Groups;
 using AiGroupChat.Application.DTOs.Messages;
 using AiGroupChat.Application.DTOs.SignalR.GroupChannel;
 using AiGroupChat.Application.DTOs.SignalR.PersonalChannel;
@@ -24,19 +23,19 @@ public interface IChatHubService
     Task BroadcastAiSettingsChangedAsync(Guid groupId, AiSettingsChangedEvent settings, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Broadcast that a member was added to a group
+    /// Broadcast that a member joined a group
     /// </summary>
-    Task BroadcastMemberAddedAsync(Guid groupId, GroupMemberResponse member, CancellationToken cancellationToken = default);
+    Task BroadcastMemberJoinedAsync(Guid groupId, MemberJoinedEvent eventData, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Broadcast that a member was removed from a group
+    /// Broadcast that a member left or was removed from a group
     /// </summary>
-    Task BroadcastMemberRemovedAsync(Guid groupId, string userId, CancellationToken cancellationToken = default);
+    Task BroadcastMemberLeftAsync(Guid groupId, MemberLeftEvent eventData, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Broadcast that a member's role was changed
     /// </summary>
-    Task BroadcastMemberRoleChangedAsync(Guid groupId, string userId, string newRole, CancellationToken cancellationToken = default);
+    Task BroadcastMemberRoleChangedAsync(Guid groupId, MemberRoleChangedEvent eventData, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Broadcast that a user started typing in a group
@@ -46,7 +45,7 @@ public interface IChatHubService
     /// <summary>
     /// Broadcast that a user stopped typing in a group
     /// </summary>
-    Task BroadcastUserStoppedTypingAsync(Guid groupId, string userId, CancellationToken cancellationToken = default);
+    Task BroadcastUserStoppedTypingAsync(Guid groupId, UserStoppedTypingEvent eventData, CancellationToken cancellationToken = default);
 
     #endregion
 

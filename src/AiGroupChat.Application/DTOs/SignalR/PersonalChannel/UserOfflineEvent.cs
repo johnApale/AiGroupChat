@@ -6,5 +6,6 @@ namespace AiGroupChat.Application.DTOs.SignalR.PersonalChannel;
 public class UserOfflineEvent
 {
     public string UserId { get; set; } = string.Empty;
+    public string DisplayName { get; set; } = string.Empty;
     public DateTime OfflineAt { get; set; }
 }

@@ -6,5 +6,8 @@ namespace AiGroupChat.Application.DTOs.SignalR.PersonalChannel;
 public class AddedToGroupEvent
 {
     public Guid GroupId { get; set; }
+    public string GroupName { get; set; } = string.Empty;
+    public string AddedByName { get; set; } = string.Empty;
+    public string Role { get; set; } = string.Empty;
     public DateTime AddedAt { get; set; }
 }

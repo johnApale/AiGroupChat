@@ -11,9 +11,17 @@ public class UpdateAiSettingsBroadcastTests : GroupServiceTestBase
     private readonly string _userId = "user-123";
     private readonly Guid _groupId = Guid.NewGuid();
     private readonly Group _existingGroup;
+    private readonly User _currentUser;
 
     public UpdateAiSettingsBroadcastTests()
     {
+        _currentUser = new User
+        {
+            Id = _userId,
+            UserName = "testuser",
+            DisplayName = "Test User"
+        };
+
         _existingGroup = new Group
         {
             Id = _groupId,
@@ -26,9 +34,14 @@ public class UpdateAiSettingsBroadcastTests : GroupServiceTestBase
             UpdatedAt = DateTime.UtcNow.AddDays(-1),
             Members = new List<GroupMember>
             {
-                new() { UserId = _userId, Role = GroupRole.Owner, User = new User { Id = _userId, UserName = "testuser", DisplayName = "Test User" } }
+                new() { UserId = _userId, Role = GroupRole.Owner, User = _currentUser }
             }
         };
+
+        // Setup user repository to return current user
+        UserRepositoryMock
+            .Setup(x => x.FindByIdAsync(_userId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(_currentUser);
     }
 
     [Fact]
@@ -54,7 +67,8 @@ public class UpdateAiSettingsBroadcastTests : GroupServiceTestBase
                 _groupId,
                 It.Is<AiSettingsChangedEvent>(e => 
                     e.GroupId == _groupId && 
-                    e.AiMonitoringEnabled == true),
+                    e.AiMonitoringEnabled == true &&
+                    e.ChangedByName == "Test User"),
                 It.IsAny<CancellationToken>()),
             Times.Once);
     }
@@ -102,5 +116,7 @@ public class UpdateAiSettingsBroadcastTests : GroupServiceTestBase
         Assert.Equal(_groupId, capturedEvent.GroupId);
         Assert.Equal(newProvider.Id, capturedEvent.AiProviderId);
         Assert.Equal("Anthropic Claude", capturedEvent.AiProviderName);
+        Assert.Equal("Test User", capturedEvent.ChangedByName);
+        Assert.True(capturedEvent.ChangedAt > DateTime.MinValue);
     }
 }
