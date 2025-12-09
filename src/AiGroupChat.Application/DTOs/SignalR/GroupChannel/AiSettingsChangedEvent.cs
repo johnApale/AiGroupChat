@@ -1,4 +1,4 @@
-namespace AiGroupChat.Application.DTOs.SignalR;
+namespace AiGroupChat.Application.DTOs.SignalR.GroupChannel;
 
 public class AiSettingsChangedEvent
 {

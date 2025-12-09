@@ -9,6 +9,7 @@ public abstract class MessageServiceTestBase
 {
     protected readonly Mock<IMessageRepository> MessageRepositoryMock;
     protected readonly Mock<IGroupRepository> GroupRepositoryMock;
+    protected readonly Mock<IGroupMemberRepository> GroupMemberRepositoryMock;
     protected readonly Mock<IChatHubService> ChatHubServiceMock;
     protected readonly Application.Services.MessageService MessageService;
 
@@ -22,6 +23,7 @@ public abstract class MessageServiceTestBase
     {
         MessageRepositoryMock = new Mock<IMessageRepository>();
         GroupRepositoryMock = new Mock<IGroupRepository>();
+        GroupMemberRepositoryMock = new Mock<IGroupMemberRepository>();
         ChatHubServiceMock = new Mock<IChatHubService>();
 
         TestUser = new User
@@ -62,9 +64,15 @@ public abstract class MessageServiceTestBase
             }
         };
 
+        // Default setup: return empty list for group member queries
+        GroupMemberRepositoryMock
+            .Setup(x => x.GetGroupMemberIdsAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new List<string>());
+
         MessageService = new Application.Services.MessageService(
             MessageRepositoryMock.Object,
             GroupRepositoryMock.Object,
+            GroupMemberRepositoryMock.Object,
             ChatHubServiceMock.Object);
     }
 

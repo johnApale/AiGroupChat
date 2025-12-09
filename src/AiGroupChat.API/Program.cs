@@ -16,6 +16,7 @@ builder.Services.AddInfrastructure(builder.Configuration);
 
 // SignalR
 builder.Services.AddSignalR();
+builder.Services.AddSingleton<IConnectionTracker, ConnectionTracker>();
 builder.Services.AddScoped<IChatHubService, ChatHubService>();
 
 // JWT Authentication

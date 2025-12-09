@@ -1,5 +1,5 @@
 using AiGroupChat.Application.DTOs.Groups;
-using AiGroupChat.Application.DTOs.SignalR;
+using AiGroupChat.Application.DTOs.SignalR.GroupChannel;
 using AiGroupChat.Domain.Entities;
 using AiGroupChat.Domain.Enums;
 using Moq;

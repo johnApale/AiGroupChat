@@ -1,6 +1,6 @@
 using AiGroupChat.Application.DTOs.AiProviders;
 using AiGroupChat.Application.DTOs.Groups;
-using AiGroupChat.Application.DTOs.SignalR;
+using AiGroupChat.Application.DTOs.SignalR.GroupChannel;
 using AiGroupChat.Application.Exceptions;
 using AiGroupChat.Application.Interfaces;
 using AiGroupChat.Domain.Entities;

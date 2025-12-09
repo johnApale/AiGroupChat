@@ -1,5 +1,6 @@
 using AiGroupChat.Application.DTOs.Common;
 using AiGroupChat.Application.DTOs.Messages;
+using AiGroupChat.Application.DTOs.SignalR.PersonalChannel;
 using AiGroupChat.Application.Exceptions;
 using AiGroupChat.Application.Interfaces;
 using AiGroupChat.Domain.Entities;
@@ -11,15 +12,18 @@ public class MessageService : IMessageService
 {
     private readonly IMessageRepository _messageRepository;
     private readonly IGroupRepository _groupRepository;
+    private readonly IGroupMemberRepository _groupMemberRepository;
     private readonly IChatHubService _chatHubService;
 
     public MessageService(
         IMessageRepository messageRepository,
         IGroupRepository groupRepository,
+        IGroupMemberRepository groupMemberRepository,
         IChatHubService chatHubService)
     {
         _messageRepository = messageRepository;
         _groupRepository = groupRepository;
+        _groupMemberRepository = groupMemberRepository;
         _chatHubService = chatHubService;
     }
 
@@ -59,8 +63,31 @@ public class MessageService : IMessageService
 
         MessageResponse response = MapToResponse(createdMessage!);
 
-        // Broadcast to group members via SignalR
+        // Broadcast to group members via SignalR (Group Channel - for active viewers)
         await _chatHubService.BroadcastMessageAsync(groupId, response, cancellationToken);
+
+        // Send personal channel notifications to all group members (except sender)
+        List<string> memberIds = await _groupMemberRepository.GetGroupMemberIdsAsync(groupId, cancellationToken);
+        List<string> otherMemberIds = memberIds.Where(id => id != currentUserId).ToList();
+
+        GroupActivityEvent activityEvent = new GroupActivityEvent
+        {
+            GroupId = groupId,
+            ActorName = createdMessage!.Sender?.DisplayName ?? createdMessage.Sender?.UserName
+        };
+
+        NewMessageNotificationEvent notificationEvent = new NewMessageNotificationEvent
+        {
+            GroupId = groupId,
+            SentAt = now
+        };
+
+        // Send to each member's personal channel
+        foreach (string memberId in otherMemberIds)
+        {
+            await _chatHubService.SendGroupActivityAsync(memberId, activityEvent, cancellationToken);
+            await _chatHubService.SendNewMessageNotificationAsync(memberId, notificationEvent, cancellationToken);
+        }
 
         return response;
     }

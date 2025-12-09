@@ -1,5 +1,6 @@
 using System.Security.Claims;
-using AiGroupChat.Application.DTOs.SignalR;
+using AiGroupChat.Application.DTOs.SignalR.GroupChannel;
+using AiGroupChat.Application.DTOs.SignalR.PersonalChannel;
 using AiGroupChat.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
@@ -11,11 +12,25 @@ public class ChatHub : Hub
 {
     private readonly IGroupRepository _groupRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IGroupMemberRepository _groupMemberRepository;
+    private readonly IConnectionTracker _connectionTracker;
+    private readonly IChatHubService _chatHubService;
+    private readonly ILogger<ChatHub> _logger;
 
-    public ChatHub(IGroupRepository groupRepository, IUserRepository userRepository)
+    public ChatHub(
+        IGroupRepository groupRepository,
+        IUserRepository userRepository,
+        IGroupMemberRepository groupMemberRepository,
+        IConnectionTracker connectionTracker,
+        IChatHubService chatHubService,
+        ILogger<ChatHub> logger)
     {
         _groupRepository = groupRepository;
         _userRepository = userRepository;
+        _groupMemberRepository = groupMemberRepository;
+        _connectionTracker = connectionTracker;
+        _chatHubService = chatHubService;
+        _logger = logger;
     }
 
     /// <summary>
@@ -97,11 +112,65 @@ public class ChatHub : Hub
 
     public override async Task OnConnectedAsync()
     {
+        string userId = GetUserId();
+        string connectionId = Context.ConnectionId;
+
+        // Auto-join personal channel
+        await Groups.AddToGroupAsync(connectionId, GetPersonalChannelName(userId));
+
+        // Track connection and broadcast presence if first connection
+        bool isFirstConnection = _connectionTracker.AddConnection(userId, connectionId);
+
+        if (isFirstConnection)
+        {
+            _logger.LogInformation("User {UserId} came online (first connection)", userId);
+
+            // Get all users who share groups with this user
+            List<string> sharedUserIds = await _groupMemberRepository.GetUsersWhoShareGroupsWithAsync(userId);
+
+            if (sharedUserIds.Count > 0)
+            {
+                UserOnlineEvent onlineEvent = new UserOnlineEvent
+                {
+                    UserId = userId,
+                    OnlineAt = DateTime.UtcNow
+                };
+
+                await _chatHubService.SendUserOnlineAsync(sharedUserIds, onlineEvent);
+            }
+        }
+
         await base.OnConnectedAsync();
     }
 
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
+        string userId = GetUserId();
+        string connectionId = Context.ConnectionId;
+
+        // Remove connection and broadcast presence if last connection
+        bool wasLastConnection = _connectionTracker.RemoveConnection(userId, connectionId);
+
+        if (wasLastConnection)
+        {
+            _logger.LogInformation("User {UserId} went offline (last connection closed)", userId);
+
+            // Get all users who share groups with this user
+            List<string> sharedUserIds = await _groupMemberRepository.GetUsersWhoShareGroupsWithAsync(userId);
+
+            if (sharedUserIds.Count > 0)
+            {
+                UserOfflineEvent offlineEvent = new UserOfflineEvent
+                {
+                    UserId = userId,
+                    OfflineAt = DateTime.UtcNow
+                };
+
+                await _chatHubService.SendUserOfflineAsync(sharedUserIds, offlineEvent);
+            }
+        }
+
+        // SignalR auto-removes from all groups on disconnect
         await base.OnDisconnectedAsync(exception);
     }
 
@@ -120,5 +189,10 @@ public class ChatHub : Hub
     private static string GetGroupName(Guid groupId)
     {
         return $"group-{groupId}";
+    }
+
+    private static string GetPersonalChannelName(string userId)
+    {
+        return $"user-{userId}";
     }
 }

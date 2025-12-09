@@ -1,4 +1,5 @@
 using AiGroupChat.Application.DTOs.Groups;
+using AiGroupChat.Application.DTOs.SignalR.PersonalChannel;
 using AiGroupChat.Application.Exceptions;
 using AiGroupChat.Application.Interfaces;
 using AiGroupChat.Domain.Entities;
@@ -68,8 +69,16 @@ public class GroupMemberService : IGroupMemberService
         GroupMember? addedMember = await _groupRepository.GetMemberAsync(groupId, request.UserId, cancellationToken);
         GroupMemberResponse response = MapToResponse(addedMember!);
 
-        // Broadcast member added to group
+        // Broadcast member added to group (Group Channel - for active viewers)
         await _chatHubService.BroadcastMemberAddedAsync(groupId, response, cancellationToken);
+
+        // Send personal channel notification to the added user
+        AddedToGroupEvent addedEvent = new AddedToGroupEvent
+        {
+            GroupId = groupId,
+            AddedAt = DateTime.UtcNow
+        };
+        await _chatHubService.SendAddedToGroupAsync(request.UserId, addedEvent, cancellationToken);
 
         return response;
     }
@@ -131,8 +140,16 @@ public class GroupMemberService : IGroupMemberService
         member.Role = newRole;
         await _groupRepository.UpdateMemberAsync(member, cancellationToken);
 
-        // Broadcast role change to group
+        // Broadcast role change to group (Group Channel - for active viewers)
         await _chatHubService.BroadcastMemberRoleChangedAsync(groupId, userId, newRole.ToString(), cancellationToken);
+
+        // Send personal channel notification to the user whose role changed
+        RoleChangedEvent roleEvent = new RoleChangedEvent
+        {
+            GroupId = groupId,
+            ChangedAt = DateTime.UtcNow
+        };
+        await _chatHubService.SendRoleChangedAsync(userId, roleEvent, cancellationToken);
 
         return MapToResponse(member);
     }
@@ -176,8 +193,16 @@ public class GroupMemberService : IGroupMemberService
 
         await _groupRepository.RemoveMemberAsync(member, cancellationToken);
 
-        // Broadcast member removed to group
+        // Broadcast member removed to group (Group Channel - for active viewers)
         await _chatHubService.BroadcastMemberRemovedAsync(groupId, userId, cancellationToken);
+
+        // Send personal channel notification to the removed user
+        RemovedFromGroupEvent removedEvent = new RemovedFromGroupEvent
+        {
+            GroupId = groupId,
+            RemovedAt = DateTime.UtcNow
+        };
+        await _chatHubService.SendRemovedFromGroupAsync(userId, removedEvent, cancellationToken);
     }
 
     public async Task LeaveGroupAsync(Guid groupId, string currentUserId, CancellationToken cancellationToken = default)
