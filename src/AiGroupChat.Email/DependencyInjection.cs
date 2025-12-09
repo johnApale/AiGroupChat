@@ -18,7 +18,7 @@ public static class DependencyInjection
         services.Configure<EmailSettings>(configuration.GetSection(EmailSettings.SectionName));
         
         // Get API key for Resend
-        var emailSettings = configuration.GetSection(EmailSettings.SectionName).Get<EmailSettings>();
+        EmailSettings? emailSettings = configuration.GetSection(EmailSettings.SectionName).Get<EmailSettings>();
         
         // Register Resend client
         services.AddOptions();

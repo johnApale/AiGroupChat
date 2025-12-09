@@ -10,7 +10,7 @@ namespace AiGroupChat.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            var now = DateTime.UtcNow;
+            DateTime now = DateTime.UtcNow;
 
             migrationBuilder.InsertData(
                 table: "ai_providers",

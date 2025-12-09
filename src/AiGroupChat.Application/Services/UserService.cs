@@ -15,7 +15,7 @@ public class UserService : IUserService
 
     public async Task<UserResponse> GetByIdAsync(string userId, CancellationToken cancellationToken = default)
     {
-        var user = await _userRepository.FindByIdAsync(userId, cancellationToken);
+        Domain.Entities.User? user = await _userRepository.FindByIdAsync(userId, cancellationToken);
 
         if (user == null)
         {

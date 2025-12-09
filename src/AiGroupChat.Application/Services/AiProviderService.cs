@@ -16,13 +16,13 @@ public class AiProviderService : IAiProviderService
 
     public async Task<List<AiProviderResponse>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        var providers = await _aiProviderRepository.GetAllEnabledAsync(cancellationToken);
+        IEnumerable<AiProvider> providers = await _aiProviderRepository.GetAllEnabledAsync(cancellationToken);
         return providers.Select(MapToResponse).ToList();
     }
 
     public async Task<AiProviderResponse> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var provider = await _aiProviderRepository.GetByIdAsync(id, cancellationToken);
+        AiProvider? provider = await _aiProviderRepository.GetByIdAsync(id, cancellationToken);
 
         if (provider == null || !provider.IsEnabled)
         {
