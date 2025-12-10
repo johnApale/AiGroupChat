@@ -32,6 +32,6 @@ public abstract class IntegrationTestBase : IClassFixture<CustomWebApplicationFa
     private FakeEmailProvider GetFakeEmailProvider()
     {
         using IServiceScope scope = Factory.Services.CreateScope();
-        return (FakeEmailProvider)scope.ServiceProvider.GetRequiredService<AiGroupChat.Email.Interfaces.IEmailProvider>();
+        return (FakeEmailProvider)scope.ServiceProvider.GetRequiredService<Email.Interfaces.IEmailProvider>();
     }
 }
