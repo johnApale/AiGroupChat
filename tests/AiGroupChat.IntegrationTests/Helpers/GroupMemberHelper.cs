@@ -92,4 +92,25 @@ public class GroupMemberHelper
     {
         return await _client.DeleteAsync($"/api/groups/{groupId}/members/me");
     }
+
+    /// <summary>
+    /// Transfers group ownership and returns the HTTP response
+    /// </summary>
+    public async Task<HttpResponseMessage> TransferOwnershipRawAsync(Guid groupId, string newOwnerUserId)
+    {
+        TransferOwnershipRequest request = new() { NewOwnerUserId = newOwnerUserId };
+        return await _client.PutAsJsonAsync($"/api/groups/{groupId}/owner", request);
+    }
+
+    /// <summary>
+    /// Transfers group ownership and returns the response object
+    /// </summary>
+    public async Task<GroupMemberResponse> TransferOwnershipAsync(Guid groupId, string newOwnerUserId)
+    {
+        HttpResponseMessage response = await TransferOwnershipRawAsync(groupId, newOwnerUserId);
+        response.EnsureSuccessStatusCode();
+
+        GroupMemberResponse? member = await response.Content.ReadFromJsonAsync<GroupMemberResponse>();
+        return member ?? throw new InvalidOperationException("Failed to deserialize member response");
+    }
 }
