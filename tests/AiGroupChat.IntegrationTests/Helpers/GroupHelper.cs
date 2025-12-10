@@ -83,4 +83,16 @@ public class GroupHelper
         };
         return await _client.PutAsJsonAsync($"/api/groups/{groupId}/ai", request);
     }
+
+    /// <summary>
+    /// Updates AI settings for a group and returns the response object
+    /// </summary>
+    public async Task<GroupResponse> UpdateAiSettingsAsync(Guid groupId, bool? aiMonitoringEnabled = null, Guid? aiProviderId = null)
+    {
+        HttpResponseMessage response = await UpdateAiSettingsRawAsync(groupId, aiMonitoringEnabled, aiProviderId);
+        response.EnsureSuccessStatusCode();
+
+        GroupResponse? settings = await response.Content.ReadFromJsonAsync<GroupResponse>();
+        return settings ?? throw new InvalidOperationException("Failed to deserialize AI settings response");
+    }
 }

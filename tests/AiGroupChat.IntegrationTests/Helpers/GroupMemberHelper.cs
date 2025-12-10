@@ -86,11 +86,29 @@ public class GroupMemberHelper
     }
 
     /// <summary>
+    /// Removes a member from a group (throws on failure)
+    /// </summary>
+    public async Task RemoveMemberAsync(Guid groupId, string memberId)
+    {
+        HttpResponseMessage response = await RemoveMemberRawAsync(groupId, memberId);
+        response.EnsureSuccessStatusCode();
+    }
+
+    /// <summary>
     /// Leaves a group (current user) and returns the HTTP response
     /// </summary>
     public async Task<HttpResponseMessage> LeaveGroupRawAsync(Guid groupId)
     {
         return await _client.DeleteAsync($"/api/groups/{groupId}/members/me");
+    }
+
+    /// <summary>
+    /// Leaves a group (current user, throws on failure)
+    /// </summary>
+    public async Task LeaveGroupAsync(Guid groupId)
+    {
+        HttpResponseMessage response = await LeaveGroupRawAsync(groupId);
+        response.EnsureSuccessStatusCode();
     }
 
     /// <summary>
