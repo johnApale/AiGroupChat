@@ -38,7 +38,9 @@ AiGroupChat.IntegrationTests/
     ├── Users/                           # User endpoint tests
     ├── Groups/                          # Group CRUD tests
     ├── GroupMembers/                    # Member management tests
-    └── GroupOwner/                      # Ownership transfer tests
+    ├── GroupOwner/                      # Ownership transfer tests
+    ├── Messages/                        # Message send/retrieve tests
+    └── AiProviders/                     # AI provider listing tests
 ```
 
 ## Architecture
@@ -67,6 +69,8 @@ Helpers provide reusable operations for common test scenarios:
 - `AuthHelper` - User registration, login, email confirmation
 - `GroupHelper` - Group creation, update, delete, AI settings
 - `GroupMemberHelper` - Add/remove members, update roles, leave group, transfer ownership
+- `MessageHelper` - Send and retrieve messages
+- `AiProviderHelper` - List and retrieve AI providers
 
 ## Writing New Tests
 
@@ -215,20 +219,29 @@ Testcontainers reuses containers when possible. First run downloads the PostgreS
 | -------------------------- | ----------------------------------- |
 | PUT /api/groups/{id}/owner | ✅ TransferOwnershipTests (9 tests) |
 
-### Other Controllers
+### Messages Controller (16 tests)
 
-| Controller  | Status     |
-| ----------- | ---------- |
-| Messages    | 🔲 Planned |
-| AiProviders | 🔲 Planned |
+| Endpoint                       | Tests                         |
+| ------------------------------ | ----------------------------- |
+| POST /api/groups/{id}/messages | ✅ SendMessageTests (7 tests) |
+| GET /api/groups/{id}/messages  | ✅ GetMessagesTests (9 tests) |
+
+### AiProviders Controller (6 tests)
+
+| Endpoint                   | Tests                             |
+| -------------------------- | --------------------------------- |
+| GET /api/ai-providers      | ✅ GetAllProvidersTests (3 tests) |
+| GET /api/ai-providers/{id} | ✅ GetProviderByIdTests (3 tests) |
 
 ### Summary
 
-| Controller   | Tests  |
-| ------------ | ------ |
-| Auth         | 6      |
-| Users        | 6      |
-| Groups       | 25     |
-| GroupMembers | 38     |
-| GroupOwner   | 9      |
-| **Total**    | **84** |
+| Controller   | Tests   |
+| ------------ | ------- |
+| Auth         | 6       |
+| Users        | 6       |
+| Groups       | 25      |
+| GroupMembers | 38      |
+| GroupOwner   | 9       |
+| Messages     | 16      |
+| AiProviders  | 6       |
+| **Total**    | **106** |
