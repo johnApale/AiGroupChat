@@ -353,6 +353,33 @@ public class GroupMemberService : IGroupMemberService
         };
         await _chatHubService.BroadcastMemberRoleChangedAsync(groupId, newOwnerRoleEvent, cancellationToken);
 
+        // Send personal channel notifications to both users
+        DateTime now = DateTime.UtcNow;
+
+        // Notify the old owner (now Admin)
+        RoleChangedEvent oldOwnerPersonalEvent = new RoleChangedEvent
+        {
+            GroupId = groupId,
+            GroupName = group.Name,
+            OldRole = currentUserOldRole,
+            NewRole = GroupRole.Admin.ToString(),
+            ChangedByName = currentMember.User?.DisplayName ?? currentMember.User?.UserName ?? string.Empty,
+            ChangedAt = now
+        };
+        await _chatHubService.SendRoleChangedAsync(currentUserId, oldOwnerPersonalEvent, cancellationToken);
+
+        // Notify the new owner
+        RoleChangedEvent newOwnerPersonalEvent = new RoleChangedEvent
+        {
+            GroupId = groupId,
+            GroupName = group.Name,
+            OldRole = newOwnerOldRole,
+            NewRole = GroupRole.Owner.ToString(),
+            ChangedByName = currentMember.User?.DisplayName ?? currentMember.User?.UserName ?? string.Empty,
+            ChangedAt = now
+        };
+        await _chatHubService.SendRoleChangedAsync(request.NewOwnerUserId, newOwnerPersonalEvent, cancellationToken);
+
         // Return the new owner's member info
         GroupMember? updatedNewOwner = await _groupRepository.GetMemberAsync(groupId, request.NewOwnerUserId, cancellationToken);
         return MapToResponse(updatedNewOwner!);
