@@ -14,6 +14,7 @@ public abstract class IntegrationTestBase : IClassFixture<CustomWebApplicationFa
     protected readonly AuthHelper Auth;
     protected readonly GroupHelper Groups;
     protected readonly GroupMemberHelper Members;
+    protected readonly MessageHelper Messages;
 
     protected IntegrationTestBase(CustomWebApplicationFactory factory)
     {
@@ -23,6 +24,7 @@ public abstract class IntegrationTestBase : IClassFixture<CustomWebApplicationFa
         Auth = new AuthHelper(Client, EmailProvider);
         Groups = new GroupHelper(Client);
         Members = new GroupMemberHelper(Client);
+        Messages = new MessageHelper(Client);
     }
 
     public virtual Task InitializeAsync() => Task.CompletedTask;
