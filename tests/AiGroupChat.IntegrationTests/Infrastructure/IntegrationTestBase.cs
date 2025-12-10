@@ -13,6 +13,7 @@ public abstract class IntegrationTestBase : IClassFixture<CustomWebApplicationFa
     protected readonly FakeEmailProvider EmailProvider;
     protected readonly AuthHelper Auth;
     protected readonly GroupHelper Groups;
+    protected readonly GroupMemberHelper Members;
 
     protected IntegrationTestBase(CustomWebApplicationFactory factory)
     {
@@ -21,6 +22,7 @@ public abstract class IntegrationTestBase : IClassFixture<CustomWebApplicationFa
         EmailProvider = GetFakeEmailProvider();
         Auth = new AuthHelper(Client, EmailProvider);
         Groups = new GroupHelper(Client);
+        Members = new GroupMemberHelper(Client);
     }
 
     public virtual Task InitializeAsync() => Task.CompletedTask;
