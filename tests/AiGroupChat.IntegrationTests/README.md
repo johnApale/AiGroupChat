@@ -16,6 +16,9 @@ dotnet test tests/AiGroupChat.IntegrationTests
 # Run specific test class
 dotnet test tests/AiGroupChat.IntegrationTests --filter "RegisterTests"
 
+# Run all SignalR tests
+dotnet test tests/AiGroupChat.IntegrationTests --filter "FullyQualifiedName~Hubs.ChatHub"
+
 # Run with detailed output
 dotnet test tests/AiGroupChat.IntegrationTests --logger "console;verbosity=detailed"
 ```
@@ -28,19 +31,33 @@ AiGroupChat.IntegrationTests/
 │   ├── CustomWebApplicationFactory.cs   # Configures test server + database
 │   ├── DatabaseCleaner.cs               # Cleans tables between tests
 │   ├── FakeEmailProvider.cs             # Captures emails in memory
-│   └── IntegrationTestBase.cs           # Base class for all tests
+│   ├── IntegrationTestBase.cs           # Base class for REST API tests
+│   ├── SignalRCollection.cs             # xUnit collection for SignalR tests
+│   └── SignalRIntegrationTestBase.cs    # Base class for SignalR tests
 ├── Helpers/                  # Reusable test operations
 │   ├── AuthHelper.cs                    # Register, login, confirm helpers
 │   ├── GroupHelper.cs                   # Group CRUD helpers
-│   └── GroupMemberHelper.cs             # Member management helpers
-└── Controllers/              # Tests organized by controller
-    ├── Auth/                            # Auth endpoint tests
-    ├── Users/                           # User endpoint tests
-    ├── Groups/                          # Group CRUD tests
-    ├── GroupMembers/                    # Member management tests
-    ├── GroupOwner/                      # Ownership transfer tests
-    ├── Messages/                        # Message send/retrieve tests
-    └── AiProviders/                     # AI provider listing tests
+│   ├── GroupMemberHelper.cs             # Member management helpers
+│   ├── MessageHelper.cs                 # Message send/retrieve helpers
+│   ├── AiProviderHelper.cs              # AI provider listing helpers
+│   └── SignalRHelper.cs                 # SignalR connection + event helpers
+├── Controllers/              # REST API tests organized by controller
+│   ├── Auth/                            # Auth endpoint tests
+│   ├── Users/                           # User endpoint tests
+│   ├── Groups/                          # Group CRUD tests
+│   ├── GroupMembers/                    # Member management tests
+│   ├── GroupOwner/                      # Ownership transfer tests
+│   ├── Messages/                        # Message send/retrieve tests
+│   └── AiProviders/                     # AI provider listing tests
+└── Hubs/                     # SignalR hub tests
+    └── ChatHub/                         # ChatHub integration tests
+        ├── ConnectionTests.cs           # WebSocket connection/auth
+        ├── JoinLeaveGroupTests.cs       # SignalR group subscription
+        ├── TypingIndicatorTests.cs      # Typing broadcasts
+        ├── MessageBroadcastTests.cs     # Message delivery via WebSocket
+        ├── MemberEventTests.cs          # Member join/leave/role events
+        ├── AiSettingsEventTests.cs      # AI settings broadcasts
+        └── PresenceTests.cs             # Online/offline presence
 ```
 
 ## Architecture
@@ -61,6 +78,7 @@ Each test runs in isolation:
 - **Database**: `DatabaseCleaner` deletes all data after each test
 - **Email**: `FakeEmailProvider` clears captured emails after each test
 - **HTTP Client**: Fresh client per test class
+- **SignalR**: Connections auto-disposed after each test
 
 ### Helpers
 
@@ -71,6 +89,7 @@ Helpers provide reusable operations for common test scenarios:
 - `GroupMemberHelper` - Add/remove members, update roles, leave group, transfer ownership
 - `MessageHelper` - Send and retrieve messages
 - `AiProviderHelper` - List and retrieve AI providers
+- `SignalRHelper` - WebSocket connection, event collection, hub method invocation
 
 ## Writing New Tests
 
@@ -104,7 +123,37 @@ public class LoginTests : IntegrationTestBase
 }
 ```
 
-### 2. Use helpers for common operations
+### 2. Create a SignalR test class
+
+```csharp
+using AiGroupChat.IntegrationTests.Infrastructure;
+using AiGroupChat.IntegrationTests.Helpers;
+
+namespace AiGroupChat.IntegrationTests.Hubs.ChatHub;
+
+[Collection("SignalR")]
+public class MySignalRTests : SignalRIntegrationTestBase
+{
+    public MySignalRTests(CustomWebApplicationFactory factory) : base(factory) { }
+
+    [Fact]
+    public async Task MyTest_Scenario_ExpectedResult()
+    {
+        // Arrange - Create user and connect
+        AuthResponse user = await Auth.CreateAuthenticatedUserAsync();
+        SignalRHelper connection = await CreateSignalRConnectionAsync(user.AccessToken);
+
+        // Act - Join group and wait for events
+        await connection.JoinGroupAsync(groupId);
+
+        // Assert - Wait for expected event
+        MessageResponse msg = await connection.WaitForMessageAsync(m => m.Content == "Hello");
+        Assert.NotNull(msg);
+    }
+}
+```
+
+### 3. Use helpers for common operations
 
 ```csharp
 // Create an authenticated user (registers, confirms, sets auth header)
@@ -116,9 +165,14 @@ HttpResponseMessage response = await Client.GetAsync("/api/groups");
 // Check captured emails
 Assert.Single(EmailProvider.SentEmails);
 string? token = EmailProvider.ExtractTokenFromLastEmail();
+
+// Create SignalR connection and wait for events
+SignalRHelper connection = await CreateSignalRConnectionAsync(user.AccessToken);
+await connection.JoinGroupAsync(groupId);
+MessageResponse msg = await connection.WaitForMessageAsync(m => m.GroupId == groupId);
 ```
 
-### 3. Test both success and failure cases
+### 4. Test both success and failure cases
 
 ```csharp
 [Fact]
@@ -151,6 +205,16 @@ Tests use in-memory configuration defined in `CustomWebApplicationFactory`:
 | Database            | Fresh PostgreSQL container per test run          |
 | Email               | `FakeEmailProvider` (no real emails sent)        |
 
+## SignalR Test Configuration
+
+SignalR tests use sequential execution via `[Collection("SignalR")]` to avoid:
+
+- ConnectionTracker singleton conflicts
+- Database race conditions
+- Flaky parallel WebSocket tests
+
+Default timeout for waiting on SignalR events: **5 seconds**
+
 ## Troubleshooting
 
 ### Tests fail with "Cannot connect to Docker"
@@ -169,6 +233,12 @@ builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationSc
 ### Tests are slow
 
 Testcontainers reuses containers when possible. First run downloads the PostgreSQL image (~200MB), subsequent runs are faster.
+
+### SignalR tests timeout
+
+- Ensure Docker is running (database needed)
+- Check if the event is actually being broadcast by the service
+- Verify the correct SignalR group was joined before expecting events
 
 ## Coverage
 
@@ -233,9 +303,21 @@ Testcontainers reuses containers when possible. First run downloads the PostgreS
 | GET /api/ai-providers      | ✅ GetAllProvidersTests (3 tests) |
 | GET /api/ai-providers/{id} | ✅ GetProviderByIdTests (3 tests) |
 
+### ChatHub SignalR (40 tests)
+
+| Feature              | Tests                              |
+| -------------------- | ---------------------------------- |
+| Connection/Auth      | ✅ ConnectionTests (3 tests)       |
+| Join/Leave Groups    | ✅ JoinLeaveGroupTests (6 tests)   |
+| Typing Indicators    | ✅ TypingIndicatorTests (5 tests)  |
+| Message Broadcasting | ✅ MessageBroadcastTests (7 tests) |
+| Member Events        | ✅ MemberEventTests (8 tests)      |
+| AI Settings Events   | ✅ AiSettingsEventTests (4 tests)  |
+| Presence (Online)    | ✅ PresenceTests (7 tests)         |
+
 ### Summary
 
-| Controller   | Tests   |
+| Category     | Tests   |
 | ------------ | ------- |
 | Auth         | 6       |
 | Users        | 6       |
@@ -244,4 +326,5 @@ Testcontainers reuses containers when possible. First run downloads the PostgreS
 | GroupOwner   | 9       |
 | Messages     | 16      |
 | AiProviders  | 6       |
-| **Total**    | **106** |
+| **SignalR**  | **40**  |
+| **Total**    | **146** |
