@@ -30,10 +30,15 @@ AiGroupChat.IntegrationTests/
 │   ├── FakeEmailProvider.cs             # Captures emails in memory
 │   └── IntegrationTestBase.cs           # Base class for all tests
 ├── Helpers/                  # Reusable test operations
-│   └── AuthHelper.cs                    # Register, login, confirm helpers
+│   ├── AuthHelper.cs                    # Register, login, confirm helpers
+│   ├── GroupHelper.cs                   # Group CRUD helpers
+│   └── GroupMemberHelper.cs             # Member management helpers
 └── Controllers/              # Tests organized by controller
-    └── Auth/
-        └── RegisterTests.cs
+    ├── Auth/                            # Auth endpoint tests
+    ├── Users/                           # User endpoint tests
+    ├── Groups/                          # Group CRUD tests
+    ├── GroupMembers/                    # Member management tests
+    └── GroupOwner/                      # Ownership transfer tests
 ```
 
 ## Architecture
@@ -60,7 +65,8 @@ Each test runs in isolation:
 Helpers provide reusable operations for common test scenarios:
 
 - `AuthHelper` - User registration, login, email confirmation
-- More helpers added as needed (GroupHelper, MessageHelper, etc.)
+- `GroupHelper` - Group creation, update, delete, AI settings
+- `GroupMemberHelper` - Add/remove members, update roles, leave group, transfer ownership
 
 ## Writing New Tests
 
@@ -162,7 +168,7 @@ Testcontainers reuses containers when possible. First run downloads the PostgreS
 
 ## Coverage
 
-### Auth Controller
+### Auth Controller (6 tests)
 
 | Endpoint                           | Tests                      |
 | ---------------------------------- | -------------------------- |
@@ -175,12 +181,54 @@ Testcontainers reuses containers when possible. First run downloads the PostgreS
 | POST /api/auth/refresh             | 🔲 Planned                 |
 | POST /api/auth/logout              | 🔲 Planned                 |
 
+### Users Controller (6 tests)
+
+| Endpoint            | Tests                             |
+| ------------------- | --------------------------------- |
+| GET /api/users/me   | ✅ UsersControllerTests (3 tests) |
+| GET /api/users/{id} | ✅ UsersControllerTests (3 tests) |
+
+### Groups Controller (25 tests)
+
+| Endpoint                | Tests                              |
+| ----------------------- | ---------------------------------- |
+| POST /api/groups        | ✅ CreateGroupTests (4 tests)      |
+| GET /api/groups         | ✅ GetMyGroupsTests (3 tests)      |
+| GET /api/groups/{id}    | ✅ GetGroupByIdTests (4 tests)     |
+| PUT /api/groups/{id}    | ✅ UpdateGroupTests (5 tests)      |
+| DELETE /api/groups/{id} | ✅ DeleteGroupTests (4 tests)      |
+| PUT /api/groups/{id}/ai | ✅ UpdateAiSettingsTests (5 tests) |
+
+### GroupMembers Controller (38 tests)
+
+| Endpoint                                   | Tests                               |
+| ------------------------------------------ | ----------------------------------- |
+| POST /api/groups/{id}/members              | ✅ AddMemberTests (8 tests)         |
+| GET /api/groups/{id}/members               | ✅ GetMembersTests (4 tests)        |
+| PUT /api/groups/{id}/members/{memberId}    | ✅ UpdateMemberRoleTests (10 tests) |
+| DELETE /api/groups/{id}/members/{memberId} | ✅ RemoveMemberTests (10 tests)     |
+| DELETE /api/groups/{id}/members/me         | ✅ LeaveGroupTests (6 tests)        |
+
+### GroupOwner Controller (9 tests)
+
+| Endpoint                   | Tests                               |
+| -------------------------- | ----------------------------------- |
+| PUT /api/groups/{id}/owner | ✅ TransferOwnershipTests (9 tests) |
+
 ### Other Controllers
 
-| Controller   | Status     |
-| ------------ | ---------- |
-| Groups       | 🔲 Planned |
-| GroupMembers | 🔲 Planned |
-| Messages     | 🔲 Planned |
-| Users        | 🔲 Planned |
-| AiProviders  | 🔲 Planned |
+| Controller  | Status     |
+| ----------- | ---------- |
+| Messages    | 🔲 Planned |
+| AiProviders | 🔲 Planned |
+
+### Summary
+
+| Controller   | Tests  |
+| ------------ | ------ |
+| Auth         | 6      |
+| Users        | 6      |
+| Groups       | 25     |
+| GroupMembers | 38     |
+| GroupOwner   | 9      |
+| **Total**    | **84** |
