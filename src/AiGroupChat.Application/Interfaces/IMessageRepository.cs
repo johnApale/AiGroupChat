@@ -23,4 +23,9 @@ public interface IMessageRepository
     /// Get a message by ID
     /// </summary>
     Task<Message?> GetByIdAsync(Guid messageId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Get AI-visible messages for context (oldest first, limited by maxMessages)
+    /// </summary>
+    Task<List<Message>> GetAiContextMessagesAsync(Guid groupId, int maxMessages, CancellationToken cancellationToken = default);
 }

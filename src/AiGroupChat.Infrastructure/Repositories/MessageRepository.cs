@@ -53,4 +53,19 @@ public class MessageRepository : IMessageRepository
 
         return message;
     }
+
+    public async Task<List<Message>> GetAiContextMessagesAsync(Guid groupId, int maxMessages, CancellationToken cancellationToken = default)
+    {
+        // Get the most recent N AI-visible messages, then return in chronological order for AI context
+        List<Message> messages = await _context.Messages
+            .Include(m => m.Sender)
+            .Where(m => m.GroupId == groupId && m.AiVisible)
+            .OrderByDescending(m => m.CreatedAt)
+            .Take(maxMessages)
+            .ToListAsync(cancellationToken);
+
+        messages.Reverse();
+
+        return messages;
+    }
 }
