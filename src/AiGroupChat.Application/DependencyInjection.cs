@@ -14,6 +14,7 @@ public static class DependencyInjection
         services.AddScoped<IGroupMemberService, GroupMemberService>();
         services.AddScoped<IAiProviderService, AiProviderService>();
         services.AddScoped<IMessageService, MessageService>();
+        services.AddScoped<IAiInvocationService, AiInvocationService>();
 
         return services;
     }

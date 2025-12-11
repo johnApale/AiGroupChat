@@ -14,17 +14,20 @@ public class MessageService : IMessageService
     private readonly IGroupRepository _groupRepository;
     private readonly IGroupMemberRepository _groupMemberRepository;
     private readonly IChatHubService _chatHubService;
+    private readonly IAiInvocationService _aiInvocationService;
 
     public MessageService(
         IMessageRepository messageRepository,
         IGroupRepository groupRepository,
         IGroupMemberRepository groupMemberRepository,
-        IChatHubService chatHubService)
+        IChatHubService chatHubService,
+        IAiInvocationService aiInvocationService)
     {
         _messageRepository = messageRepository;
         _groupRepository = groupRepository;
         _groupMemberRepository = groupMemberRepository;
         _chatHubService = chatHubService;
+        _aiInvocationService = aiInvocationService;
     }
 
     public async Task<MessageResponse> SendMessageAsync(Guid groupId, SendMessageRequest request, string currentUserId, CancellationToken cancellationToken = default)
@@ -100,6 +103,12 @@ public class MessageService : IMessageService
         {
             await _chatHubService.SendGroupActivityAsync(memberId, activityEvent, cancellationToken);
             await _chatHubService.SendNewMessageNotificationAsync(memberId, notificationEvent, cancellationToken);
+        }
+
+        // Check for AI mention and invoke AI if needed
+        if (_aiInvocationService.IsAiMentioned(request.Content))
+        {
+            await _aiInvocationService.HandleAsync(group, createdMessage, cancellationToken);
         }
 
         return response;

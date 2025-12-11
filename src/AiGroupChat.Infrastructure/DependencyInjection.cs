@@ -46,6 +46,7 @@ public static class DependencyInjection
 
         // Configuration
         services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
+        services.Configure<AiServiceSettings>(configuration.GetSection(AiServiceSettings.SectionName));
 
         // Repositories
         services.AddScoped<IUserRepository, IdentityUserRepository>();
@@ -53,9 +54,18 @@ public static class DependencyInjection
         services.AddScoped<IGroupMemberRepository, GroupMemberRepository>();
         services.AddScoped<IAiProviderRepository, AiProviderRepository>();
         services.AddScoped<IMessageRepository, MessageRepository>();
+        services.AddScoped<IAiResponseMetadataRepository, AiResponseMetadataRepository>();
     
         // Services
         services.AddScoped<ITokenService, TokenService>();
+
+        // AI Client Service with typed HttpClient
+        AiServiceSettings aiSettings = configuration.GetSection(AiServiceSettings.SectionName).Get<AiServiceSettings>() ?? new AiServiceSettings();
+        services.AddHttpClient<IAiClientService, AiClientService>(client =>
+        {
+            client.BaseAddress = new Uri(aiSettings.BaseUrl);
+            client.Timeout = TimeSpan.FromSeconds(aiSettings.TimeoutSeconds);
+        });
 
         // Application layer services
         services.AddApplication();
