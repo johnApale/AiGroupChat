@@ -25,14 +25,21 @@ The Infrastructure layer implements external concerns and data access. This laye
 ```
 AiGroupChat.Infrastructure/
 ├── Configuration/
-│   └── JwtSettings.cs
+│   ├── JwtSettings.cs
+│   └── AiServiceSettings.cs
 ├── Data/
 │   ├── Configurations/     # EF Core entity configurations
 │   └── ApplicationDbContext.cs
 ├── Repositories/
-│   └── IdentityUserRepository.cs
+│   ├── IdentityUserRepository.cs
+│   ├── GroupRepository.cs
+│   ├── GroupMemberRepository.cs
+│   ├── AiProviderRepository.cs
+│   ├── MessageRepository.cs
+│   └── AiResponseMetadataRepository.cs
 ├── Services/
-│   └── TokenService.cs
+│   ├── TokenService.cs
+│   └── AiClientService.cs
 ├── Migrations/
 ├── DependencyInjection.cs
 └── README.md
@@ -50,20 +57,32 @@ AiGroupChat.Infrastructure/
 | `AccessTokenExpirationMinutes` | Access token lifetime (default: 15)               |
 | `RefreshTokenExpirationDays`   | Refresh token lifetime (default: 7)               |
 
+### AiServiceSettings
+
+| Property             | Description                                          |
+| -------------------- | ---------------------------------------------------- |
+| `BaseUrl`            | Base URL of Python AI service (e.g., localhost:8000) |
+| `ApiKey`             | API key for authenticating with AI service           |
+| `TimeoutSeconds`     | Request timeout in seconds (default: 30)             |
+| `MaxContextMessages` | Max messages to include as AI context (default: 100) |
+
 ## Repositories
 
-| Repository               | Interface               | Purpose                                                                |
-| ------------------------ | ----------------------- | ---------------------------------------------------------------------- |
-| `IdentityUserRepository` | `IUserRepository`       | Wraps ASP.NET Identity UserManager                                     |
-| `GroupRepository`        | `IGroupRepository`      | Group CRUD, membership checks, member management, includes AI provider |
-| `AiProviderRepository`   | `IAiProviderRepository` | AI provider queries (enabled providers, by ID)                         |
-| `MessageRepository`      | `IMessageRepository`    | Message CRUD and paginated queries                                     |
+| Repository                     | Interface                       | Purpose                                                                |
+| ------------------------------ | ------------------------------- | ---------------------------------------------------------------------- |
+| `IdentityUserRepository`       | `IUserRepository`               | Wraps ASP.NET Identity UserManager                                     |
+| `GroupRepository`              | `IGroupRepository`              | Group CRUD, membership checks, member management, includes AI provider |
+| `GroupMemberRepository`        | `IGroupMemberRepository`        | Group member queries and ID retrieval                                  |
+| `AiProviderRepository`         | `IAiProviderRepository`         | AI provider queries (enabled providers, by ID)                         |
+| `MessageRepository`            | `IMessageRepository`            | Message CRUD, paginated queries, AI context retrieval                  |
+| `AiResponseMetadataRepository` | `IAiResponseMetadataRepository` | AI response metadata storage (tokens, latency, cost)                   |
 
 ## Services
 
-| Service        | Interface       | Purpose                                     |
-| -------------- | --------------- | ------------------------------------------- |
-| `TokenService` | `ITokenService` | JWT access token and refresh token handling |
+| Service           | Interface          | Purpose                                     |
+| ----------------- | ------------------ | ------------------------------------------- |
+| `TokenService`    | `ITokenService`    | JWT access token and refresh token handling |
+| `AiClientService` | `IAiClientService` | HTTP client for calling Python AI service   |
 
 ## Entity Configurations
 
@@ -127,6 +146,12 @@ Configure in `appsettings.json`:
     "Audience": "AiGroupChat",
     "AccessTokenExpirationMinutes": 15,
     "RefreshTokenExpirationDays": 7
+  },
+  "AiService": {
+    "BaseUrl": "http://localhost:8000",
+    "ApiKey": "your-ai-service-api-key",
+    "TimeoutSeconds": 30,
+    "MaxContextMessages": 100
   }
 }
 ```

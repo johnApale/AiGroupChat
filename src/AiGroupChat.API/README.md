@@ -85,6 +85,8 @@ Events sent to the SignalR group when users are actively viewing a chat.
 | `MemberRoleChanged` | `MemberRoleChangedEvent` | Member's role was changed      |
 | `UserTyping`        | `UserTypingEvent`        | User started typing in group   |
 | `UserStoppedTyping` | `UserStoppedTypingEvent` | User stopped typing            |
+| `AiTyping`          | `AiTypingEvent`          | AI started generating response |
+| `AiStoppedTyping`   | `AiStoppedTypingEvent`   | AI finished generating         |
 
 ### Server → Client Events (Personal Channel)
 
@@ -240,6 +242,12 @@ Contains placeholder values and non-sensitive defaults:
     "Audience": "AiGroupChat",
     "AccessTokenExpirationMinutes": 15,
     "RefreshTokenExpirationDays": 7
+  },
+  "AiService": {
+    "BaseUrl": "",
+    "ApiKey": "",
+    "TimeoutSeconds": 30,
+    "MaxContextMessages": 100
   }
 }
 ```
@@ -260,6 +268,10 @@ Contains actual secrets for local development:
   },
   "Jwt": {
     "Secret": "your-secret-key-at-least-32-characters-long"
+  },
+  "AiService": {
+    "BaseUrl": "http://localhost:8000",
+    "ApiKey": "dev-api-key-change-in-production"
   }
 }
 ```

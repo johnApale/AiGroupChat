@@ -46,6 +46,9 @@ AiGroupChat.Application/
 │   │   └── UserResponse.cs
 │   ├── AiProviders/
 │   │   └── AiProviderResponse.cs
+│   ├── AiService/
+│   │   ├── AiGenerateRequest.cs
+│   │   └── AiGenerateResponse.cs
 │   ├── Common/
 │   │   └── PaginatedResponse.cs
 │   └── SignalR/
@@ -55,7 +58,9 @@ AiGroupChat.Application/
 │       │   ├── MemberRoleChangedEvent.cs
 │       │   ├── AiSettingsChangedEvent.cs
 │       │   ├── UserTypingEvent.cs
-│       │   └── UserStoppedTypingEvent.cs
+│       │   ├── UserStoppedTypingEvent.cs
+│       │   ├── AiTypingEvent.cs
+│       │   └── AiStoppedTypingEvent.cs
 │       └── PersonalChannel/
 │           ├── GroupActivityEvent.cs
 │           ├── NewMessageNotificationEvent.cs
@@ -82,6 +87,9 @@ AiGroupChat.Application/
 │   ├── IAiProviderService.cs
 │   ├── IMessageRepository.cs
 │   ├── IMessageService.cs
+│   ├── IAiClientService.cs
+│   ├── IAiInvocationService.cs
+│   ├── IAiResponseMetadataRepository.cs
 │   ├── IChatHubService.cs
 │   ├── IConnectionTracker.cs
 │   └── IEmailService.cs
@@ -93,7 +101,8 @@ AiGroupChat.Application/
 │   ├── GroupService.cs
 │   ├── GroupMemberService.cs
 │   ├── AiProviderService.cs
-│   └── MessageService.cs
+│   ├── MessageService.cs
+│   └── AiInvocationService.cs
 └── DependencyInjection.cs
 ```
 
@@ -126,6 +135,17 @@ DTOs (Data Transfer Objects) define the shape of data for API requests and respo
 | `MessageResponse`           | Message details with sender info             |
 | `PaginatedResponse<T>`      | Generic paginated response wrapper           |
 
+### AI Service DTOs
+
+| DTO                     | Purpose                                     |
+| ----------------------- | ------------------------------------------- |
+| `AiGenerateRequest`     | Request to Python AI service                |
+| `AiContextMessage`      | Message in conversation context for AI      |
+| `AiGenerateConfig`      | AI generation config (temperature, tokens)  |
+| `AiGenerateResponse`    | Response from Python AI service             |
+| `AiResponseMetadataDto` | Metadata about AI generation (tokens, etc.) |
+| `AiAttachment`          | Optional attachment from AI response        |
+
 ### SignalR Group Channel Events
 
 Events broadcast to users actively viewing a group chat.
@@ -138,6 +158,8 @@ Events broadcast to users actively viewing a group chat.
 | `AiSettingsChangedEvent` | AI monitoring toggled or provider changed |
 | `UserTypingEvent`        | User started typing                       |
 | `UserStoppedTypingEvent` | User stopped typing                       |
+| `AiTypingEvent`          | AI started generating a response          |
+| `AiStoppedTypingEvent`   | AI finished generating a response         |
 
 ### SignalR Personal Channel Events
 
@@ -157,23 +179,26 @@ Events sent to a user's personal channel for notifications.
 
 Interfaces define contracts that are implemented in other layers.
 
-| Interface                | Implemented In | Purpose                           |
-| ------------------------ | -------------- | --------------------------------- |
-| `IAuthService`           | Application    | Authentication business logic     |
-| `ITokenService`          | Infrastructure | JWT and refresh token handling    |
-| `IUserRepository`        | Infrastructure | User data access (wraps Identity) |
-| `IUserService`           | Application    | User profile retrieval            |
-| `IGroupRepository`       | Infrastructure | Group data access                 |
-| `IGroupService`          | Application    | Group CRUD and authorization      |
-| `IGroupMemberRepository` | Infrastructure | Group member queries              |
-| `IGroupMemberService`    | Application    | Group member management           |
-| `IAiProviderRepository`  | Infrastructure | AI provider data access           |
-| `IAiProviderService`     | Application    | AI provider listing and retrieval |
-| `IMessageRepository`     | Infrastructure | Message data access               |
-| `IMessageService`        | Application    | Message sending and retrieval     |
-| `IChatHubService`        | API            | SignalR real-time broadcasting    |
-| `IConnectionTracker`     | API            | User connection tracking          |
-| `IEmailService`          | Email          | Email sending                     |
+| Interface                       | Implemented In | Purpose                              |
+| ------------------------------- | -------------- | ------------------------------------ |
+| `IAuthService`                  | Application    | Authentication business logic        |
+| `ITokenService`                 | Infrastructure | JWT and refresh token handling       |
+| `IUserRepository`               | Infrastructure | User data access (wraps Identity)    |
+| `IUserService`                  | Application    | User profile retrieval               |
+| `IGroupRepository`              | Infrastructure | Group data access                    |
+| `IGroupService`                 | Application    | Group CRUD and authorization         |
+| `IGroupMemberRepository`        | Infrastructure | Group member queries                 |
+| `IGroupMemberService`           | Application    | Group member management              |
+| `IAiProviderRepository`         | Infrastructure | AI provider data access              |
+| `IAiProviderService`            | Application    | AI provider listing and retrieval    |
+| `IMessageRepository`            | Infrastructure | Message data access                  |
+| `IMessageService`               | Application    | Message sending and retrieval        |
+| `IAiClientService`              | Infrastructure | HTTP client for Python AI service    |
+| `IAiInvocationService`          | Application    | AI @mention detection and invocation |
+| `IAiResponseMetadataRepository` | Infrastructure | AI response metadata storage         |
+| `IChatHubService`               | API            | SignalR real-time broadcasting       |
+| `IConnectionTracker`            | API            | User connection tracking             |
+| `IEmailService`                 | Email          | Email sending                        |
 
 ## Exceptions
 
@@ -188,14 +213,15 @@ Custom exceptions for consistent error handling.
 
 ## Services
 
-| Service              | Purpose                                                                  |
-| -------------------- | ------------------------------------------------------------------------ |
-| `AuthService`        | Handles registration, login, password reset, token refresh               |
-| `UserService`        | Handles user lookup by ID and current user retrieval                     |
-| `GroupService`       | Handles group creation, retrieval, update, delete with authorization     |
-| `GroupMemberService` | Handles member add/remove, role changes, leave group, transfer ownership |
-| `AiProviderService`  | Handles listing and retrieving AI providers                              |
-| `MessageService`     | Handles sending messages and paginated retrieval                         |
+| Service               | Purpose                                                                        |
+| --------------------- | ------------------------------------------------------------------------------ |
+| `AuthService`         | Handles registration, login, password reset, token refresh                     |
+| `UserService`         | Handles user lookup by ID and current user retrieval                           |
+| `GroupService`        | Handles group creation, retrieval, update, delete with authorization           |
+| `GroupMemberService`  | Handles member add/remove, role changes, leave group, transfer ownership       |
+| `AiProviderService`   | Handles listing and retrieving AI providers                                    |
+| `MessageService`      | Handles sending messages, paginated retrieval, and triggering AI invocation    |
+| `AiInvocationService` | Handles @ai detection, AI service calls, typing indicators, response broadcast |
 
 ## Usage
 
