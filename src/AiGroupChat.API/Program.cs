@@ -1,4 +1,5 @@
 using System.Text;
+using AiGroupChat.API.Configuration;
 using AiGroupChat.API.Hubs;
 using AiGroupChat.API.Middleware;
 using AiGroupChat.API.Services;
@@ -64,7 +65,7 @@ builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationSc
     });
 
 builder.Services.AddControllers();
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApiDocumentation();
 
 WebApplication app = builder.Build();
 
@@ -72,11 +73,7 @@ WebApplication app = builder.Build();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 // Configure the HTTP request pipeline
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-    app.MapScalarApiReference();
-}
+app.UseOpenApiDocumentation();
 
 app.UseHttpsRedirection();
 
