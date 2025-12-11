@@ -22,6 +22,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\AiGroupChat.Application\AiGroupChat.Application.csproj" />
     <ProjectReference Include="..\..\src\AiGroupChat.API\AiGroupChat.API.csproj" />
+    <ProjectReference Include="..\..\src\AiGroupChat.Infrastructure\AiGroupChat.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

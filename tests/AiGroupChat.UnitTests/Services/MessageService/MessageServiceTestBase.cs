@@ -11,6 +11,7 @@ public abstract class MessageServiceTestBase
     protected readonly Mock<IGroupRepository> GroupRepositoryMock;
     protected readonly Mock<IGroupMemberRepository> GroupMemberRepositoryMock;
     protected readonly Mock<IChatHubService> ChatHubServiceMock;
+    protected readonly Mock<IAiInvocationService> AiInvocationServiceMock;
     protected readonly Application.Services.MessageService MessageService;
 
     protected readonly string TestUserId = "user-123";
@@ -25,6 +26,7 @@ public abstract class MessageServiceTestBase
         GroupRepositoryMock = new Mock<IGroupRepository>();
         GroupMemberRepositoryMock = new Mock<IGroupMemberRepository>();
         ChatHubServiceMock = new Mock<IChatHubService>();
+        AiInvocationServiceMock = new Mock<IAiInvocationService>();
 
         TestUser = new User
         {
@@ -69,11 +71,17 @@ public abstract class MessageServiceTestBase
             .Setup(x => x.GetGroupMemberIdsAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<string>());
 
+        // Default setup: AI mention detection returns false
+        AiInvocationServiceMock
+            .Setup(x => x.IsAiMentioned(It.IsAny<string>()))
+            .Returns(false);
+
         MessageService = new Application.Services.MessageService(
             MessageRepositoryMock.Object,
             GroupRepositoryMock.Object,
             GroupMemberRepositoryMock.Object,
-            ChatHubServiceMock.Object);
+            ChatHubServiceMock.Object,
+            AiInvocationServiceMock.Object);
     }
 
     protected Message CreateTestMessage(Guid? id = null, string? content = null, SenderType senderType = SenderType.User)
