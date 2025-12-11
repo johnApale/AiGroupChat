@@ -67,6 +67,20 @@ public class ChatHubService : IChatHubService
             .SendAsync("UserStoppedTyping", eventData, cancellationToken);
     }
 
+    public async Task BroadcastAiTypingAsync(Guid groupId, AiTypingEvent eventData, CancellationToken cancellationToken = default)
+    {
+        await _hubContext.Clients
+            .Group(GetGroupName(groupId))
+            .SendAsync("AiTyping", eventData, cancellationToken);
+    }
+
+    public async Task BroadcastAiStoppedTypingAsync(Guid groupId, AiStoppedTypingEvent eventData, CancellationToken cancellationToken = default)
+    {
+        await _hubContext.Clients
+            .Group(GetGroupName(groupId))
+            .SendAsync("AiStoppedTyping", eventData, cancellationToken);
+    }
+
     #region Personal Channel Events
 
     public async Task SendGroupActivityAsync(string userId, GroupActivityEvent eventData, CancellationToken cancellationToken = default)

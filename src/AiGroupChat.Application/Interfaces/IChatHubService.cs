@@ -47,6 +47,16 @@ public interface IChatHubService
     /// </summary>
     Task BroadcastUserStoppedTypingAsync(Guid groupId, UserStoppedTypingEvent eventData, CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Broadcast that AI started generating a response in a group
+    /// </summary>
+    Task BroadcastAiTypingAsync(Guid groupId, AiTypingEvent eventData, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Broadcast that AI stopped generating a response in a group
+    /// </summary>
+    Task BroadcastAiStoppedTypingAsync(Guid groupId, AiStoppedTypingEvent eventData, CancellationToken cancellationToken = default);
+
     #endregion
 
     #region Personal Channel Events
