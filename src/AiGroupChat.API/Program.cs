@@ -15,6 +15,9 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 // Add services to the container
 builder.Services.AddInfrastructure(builder.Configuration);
 
+// CORS
+builder.Services.AddCorsPolicy(builder.Configuration);
+
 // SignalR
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<IConnectionTracker, ConnectionTracker>();
@@ -65,7 +68,7 @@ builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationSc
     });
 
 builder.Services.AddControllers();
-builder.Services.AddOpenApiDocumentation();
+builder.Services.AddOpenApi();
 
 WebApplication app = builder.Build();
 
@@ -73,9 +76,16 @@ WebApplication app = builder.Build();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 // Configure the HTTP request pipeline
-app.UseOpenApiDocumentation();
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+    app.MapScalarApiReference();
+}
 
 app.UseHttpsRedirection();
+
+// CORS must be before authentication
+app.UseCorsPolicy();
 
 app.UseAuthentication();
 app.UseAuthorization();
