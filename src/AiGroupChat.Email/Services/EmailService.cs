@@ -65,10 +65,39 @@ public class EmailService : IEmailService
         return await _emailProvider.SendAsync(message, cancellationToken);
     }
 
+    public async Task<EmailResult> SendGroupInvitationEmailAsync(
+        string toEmail,
+        string groupName,
+        string inviterName,
+        string invitationToken,
+        int expirationDays,
+        CancellationToken cancellationToken = default)
+    {
+        string invitationUrl = BuildInvitationUrl(invitationToken);
+        (string html, string text) = await _templateService.RenderGroupInvitationEmailAsync(
+            groupName, inviterName, invitationUrl, expirationDays);
+        
+        EmailMessage message = new EmailMessage
+        {
+            To = toEmail,
+            Subject = $"You're invited to join {groupName} - AI Group Chat",
+            HtmlBody = html,
+            TextBody = text
+        };
+
+        return await _emailProvider.SendAsync(message, cancellationToken);
+    }
+
     private string BuildUrl(string path, string token, string email)
     {
         string encodedToken = HttpUtility.UrlEncode(token);
         string encodedEmail = HttpUtility.UrlEncode(email);
         return $"{_settings.FrontendBaseUrl}{path}?token={encodedToken}&email={encodedEmail}";
+    }
+
+    private string BuildInvitationUrl(string token)
+    {
+        string encodedToken = HttpUtility.UrlEncode(token);
+        return $"{_settings.FrontendBaseUrl}{_settings.AcceptInvitationPath}?token={encodedToken}";
     }
 }

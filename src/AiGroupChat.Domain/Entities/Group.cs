@@ -15,4 +15,5 @@ public class Group
     public AiProvider AiProvider { get; set; } = null!;
     public ICollection<GroupMember> Members { get; set; } = new List<GroupMember>();
     public ICollection<Message> Messages { get; set; } = new List<Message>();
+    public ICollection<GroupInvitation> Invitations { get; set; } = new List<GroupInvitation>();
 }

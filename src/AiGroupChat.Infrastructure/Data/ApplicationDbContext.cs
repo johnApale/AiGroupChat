@@ -17,6 +17,7 @@ public class ApplicationDbContext : IdentityDbContext<User>
     public DbSet<GroupMember> GroupMembers => Set<GroupMember>();
     public DbSet<Message> Messages => Set<Message>();
     public DbSet<AiResponseMetadata> AiResponseMetadata => Set<AiResponseMetadata>();
+    public DbSet<GroupInvitation> GroupInvitations => Set<GroupInvitation>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

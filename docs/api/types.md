@@ -168,6 +168,50 @@ export interface MessageItemResponse {
 }
 
 // -----------------------------------------------------------------------------
+// INVITATION TYPES
+// -----------------------------------------------------------------------------
+
+export type InvitationStatus = "Pending" | "Accepted" | "Revoked";
+
+export interface InviteMembersRequest {
+  emails: string[];
+}
+
+export interface AcceptInvitationRequest {
+  token: string;
+}
+
+export interface InvitationResponse {
+  id: string;
+  groupId: string;
+  email: string;
+  status: InvitationStatus;
+  invitedByUserName: string;
+  createdAt: string; // ISO 8601
+  expiresAt: string; // ISO 8601
+  lastSentAt: string; // ISO 8601
+  sendCount: number;
+}
+
+export interface InvitationError {
+  email: string;
+  reason: string;
+}
+
+export interface InviteMembersResponse {
+  sent: InvitationResponse[];
+  failed: InvitationError[];
+}
+
+export interface AcceptInvitationResponse {
+  requiresRegistration: boolean;
+  email?: string;
+  groupName?: string;
+  groupId?: string;
+  auth?: AuthResponse;
+}
+
+// -----------------------------------------------------------------------------
 // AI PROVIDER TYPES
 // -----------------------------------------------------------------------------
 
@@ -473,6 +517,8 @@ import type {
   GroupResponse,
   MessageItemResponse,
   MemberRole,
+  InviteMembersResponse,
+  AcceptInvitationResponse,
   isAiMessage,
   canManageMembers,
 } from "./types/api";

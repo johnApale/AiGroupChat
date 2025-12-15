@@ -16,6 +16,7 @@ public abstract class IntegrationTestBase : IClassFixture<CustomWebApplicationFa
     protected readonly GroupMemberHelper Members;
     protected readonly MessageHelper Messages;
     protected readonly AiProviderHelper AiProviders;
+    protected readonly GroupInvitationHelper Invitations;
 
     protected IntegrationTestBase(CustomWebApplicationFactory factory)
     {
@@ -27,6 +28,7 @@ public abstract class IntegrationTestBase : IClassFixture<CustomWebApplicationFa
         Members = new GroupMemberHelper(Client);
         Messages = new MessageHelper(Client);
         AiProviders = new AiProviderHelper(Client);
+        Invitations = new GroupInvitationHelper(Client);
     }
 
     public virtual Task InitializeAsync() => Task.CompletedTask;

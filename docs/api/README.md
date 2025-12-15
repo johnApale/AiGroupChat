@@ -9,15 +9,16 @@ Complete REST API documentation for the AI Group Chat application.
 
 ## Quick Links
 
-| Section                             | Description                             |
-| ----------------------------------- | --------------------------------------- |
-| [Authentication](authentication.md) | Register, login, tokens, password reset |
-| [Users](users.md)                   | User profile operations                 |
-| [Groups](groups.md)                 | Group management                        |
-| [Group Members](group-members.md)   | Member management, roles, ownership     |
-| [Messages](messages.md)             | Send and retrieve messages              |
-| [AI Providers](ai-providers.md)     | Available AI providers                  |
-| [TypeScript Types](types.md)        | Complete type definitions               |
+| Section                                   | Description                             |
+| ----------------------------------------- | --------------------------------------- |
+| [Authentication](authentication.md)       | Register, login, tokens, password reset |
+| [Users](users.md)                         | User profile operations                 |
+| [Groups](groups.md)                       | Group management                        |
+| [Group Members](group-members.md)         | Member management, roles, ownership     |
+| [Group Invitations](group-invitations.md) | Invite users via email                  |
+| [Messages](messages.md)                   | Send and retrieve messages              |
+| [AI Providers](ai-providers.md)           | Available AI providers                  |
+| [TypeScript Types](types.md)              | Complete type definitions               |
 
 ---
 

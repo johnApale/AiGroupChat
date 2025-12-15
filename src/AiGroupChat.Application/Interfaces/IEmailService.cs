@@ -16,4 +16,9 @@ public interface IEmailService
     /// Send password reset link to a user
     /// </summary>
     Task<EmailResult> SendPasswordResetEmailAsync(string toEmail, string userName, string resetToken, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Send group invitation email
+    /// </summary>
+    Task<EmailResult> SendGroupInvitationEmailAsync(string toEmail, string groupName, string inviterName, string invitationToken, int expirationDays, CancellationToken cancellationToken = default);
 }

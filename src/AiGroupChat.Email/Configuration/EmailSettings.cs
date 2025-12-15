@@ -33,4 +33,9 @@ public class EmailSettings
     /// Path for password reset page
     /// </summary>
     public string ResetPasswordPath { get; set; } = "/reset-password";
+
+    /// <summary>
+    /// Path for accepting group invitations
+    /// </summary>
+    public string AcceptInvitationPath { get; set; } = "/accept-invitation";
 }

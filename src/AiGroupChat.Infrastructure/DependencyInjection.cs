@@ -1,4 +1,5 @@
 using AiGroupChat.Application;
+using AiGroupChat.Application.Configuration;
 using AiGroupChat.Application.Interfaces;
 using AiGroupChat.Domain.Entities;
 using AiGroupChat.Email;
@@ -47,6 +48,7 @@ public static class DependencyInjection
         // Configuration
         services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
         services.Configure<AiServiceSettings>(configuration.GetSection(AiServiceSettings.SectionName));
+        services.Configure<InvitationSettings>(configuration.GetSection(InvitationSettings.SectionName));
 
         // Repositories
         services.AddScoped<IUserRepository, IdentityUserRepository>();
@@ -55,6 +57,7 @@ public static class DependencyInjection
         services.AddScoped<IAiProviderRepository, AiProviderRepository>();
         services.AddScoped<IMessageRepository, MessageRepository>();
         services.AddScoped<IAiResponseMetadataRepository, AiResponseMetadataRepository>();
+        services.AddScoped<IGroupInvitationRepository, GroupInvitationRepository>();
     
         // Services
         services.AddScoped<ITokenService, TokenService>();

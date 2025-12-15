@@ -40,18 +40,19 @@ dotnet run --project src/AiGroupChat.API
 
 ## Documentation
 
-| Document                                         | Description                             |
-| ------------------------------------------------ | --------------------------------------- |
-| [API Reference](docs/api/README.md)              | REST API overview, auth, and errors     |
-| ↳ [Authentication](docs/api/authentication.md)   | Register, login, tokens, password reset |
-| ↳ [Users](docs/api/users.md)                     | User profile endpoints                  |
-| ↳ [Groups](docs/api/groups.md)                   | Group management                        |
-| ↳ [Group Members](docs/api/group-members.md)     | Members, roles, ownership               |
-| ↳ [Messages](docs/api/messages.md)               | Send and retrieve messages              |
-| ↳ [AI Providers](docs/api/ai-providers.md)       | Available AI providers                  |
-| ↳ [TypeScript Types](docs/api/types.md)          | Type definitions for frontend           |
-| [SignalR Guide](docs/signalr-guide.md)           | Real-time integration for frontend      |
-| [Spec Document](docs/spec/ai-group-chat-spec.md) | Full technical specification            |
+| Document                                             | Description                             |
+| ---------------------------------------------------- | --------------------------------------- |
+| [API Reference](docs/api/README.md)                  | REST API overview, auth, and errors     |
+| ↳ [Authentication](docs/api/authentication.md)       | Register, login, tokens, password reset |
+| ↳ [Users](docs/api/users.md)                         | User profile endpoints                  |
+| ↳ [Groups](docs/api/groups.md)                       | Group management                        |
+| ↳ [Group Members](docs/api/group-members.md)         | Members, roles, ownership               |
+| ↳ [Group Invitations](docs/api/group-invitations.md) | Invite users via email                  |
+| ↳ [Messages](docs/api/messages.md)                   | Send and retrieve messages              |
+| ↳ [AI Providers](docs/api/ai-providers.md)           | Available AI providers                  |
+| ↳ [TypeScript Types](docs/api/types.md)              | Type definitions for frontend           |
+| [SignalR Guide](docs/signalr-guide.md)               | Real-time integration for frontend      |
+| [Spec Document](docs/spec/ai-group-chat-spec.md)     | Full technical specification            |
 
 ## Tech Stack
 
@@ -86,6 +87,9 @@ Create `src/AiGroupChat.API/appsettings.Development.json`:
   "AiService": {
     "BaseUrl": "http://localhost:8000",
     "ApiKey": "your-ai-service-api-key"
+  },
+  "Invitation": {
+    "ExpirationDays": 7
   }
 }
 ```
@@ -103,6 +107,7 @@ For production, use environment variables:
 | `Email__FrontendBaseUrl`               | Frontend URL for email links   |
 | `AiService__BaseUrl`                   | Python AI service URL          |
 | `AiService__ApiKey`                    | AI service API key             |
+| `Invitation__ExpirationDays`           | Invitation expiry (default: 7) |
 
 ## API Overview
 
@@ -139,6 +144,15 @@ For production, use environment variables:
 | DELETE | `/api/groups/:id/members/:userId` | Remove member      |
 | DELETE | `/api/groups/:id/members/me`      | Leave group        |
 | PUT    | `/api/groups/:id/owner`           | Transfer ownership |
+
+### Invitations
+
+| Method | Endpoint                             | Description       |
+| ------ | ------------------------------------ | ----------------- |
+| POST   | `/api/groups/:id/invitations`        | Send invitations  |
+| GET    | `/api/groups/:id/invitations`        | List pending      |
+| DELETE | `/api/groups/:id/invitations/:invId` | Revoke invitation |
+| POST   | `/api/invitations/accept`            | Accept invitation |
 
 ### Messages
 
