@@ -38,4 +38,11 @@ public class RegisterRequest
     /// <example>SecurePass123!</example>
     [Required(ErrorMessage = "Password is required")]
     public string Password { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Optional invitation token. When provided, email is auto-confirmed 
+    /// and user is added to the group. The email must match the invitation.
+    /// </summary>
+    /// <example>abc123-secure-token</example>
+    public string? InviteToken { get; set; }
 }

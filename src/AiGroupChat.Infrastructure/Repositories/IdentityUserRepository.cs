@@ -51,6 +51,13 @@ public class IdentityUserRepository : IUserRepository
         return result.Succeeded;
     }
 
+    public async Task ConfirmEmailDirectAsync(User user, CancellationToken cancellationToken = default)
+    {
+        // Generate and immediately use confirmation token to mark email as confirmed
+        string token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        await _userManager.ConfirmEmailAsync(user, token);
+    }
+
     public async Task<string> GeneratePasswordResetTokenAsync(User user, CancellationToken cancellationToken = default)
     {
         return await _userManager.GeneratePasswordResetTokenAsync(user);

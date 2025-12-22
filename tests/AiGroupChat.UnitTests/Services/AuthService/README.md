@@ -7,7 +7,7 @@ Unit tests for the `AuthService` class which handles all authentication business
 ```
 AuthService/
 ├── AuthServiceTestBase.cs           # Shared test setup and mocks
-├── RegisterAsyncTests.cs            # User registration tests
+├── RegisterAsyncTests.cs            # User registration tests (regular and invite-based)
 ├── LoginAsyncTests.cs               # User login tests
 ├── ConfirmEmailAsyncTests.cs        # Email confirmation tests
 ├── ResendConfirmationAsyncTests.cs  # Resend confirmation tests
@@ -25,24 +25,40 @@ AuthService/
 - `UserRepositoryMock` - Mocked `IUserRepository`
 - `TokenServiceMock` - Mocked `ITokenService`
 - `EmailServiceMock` - Mocked `IEmailService`
+- `InvitationRepositoryMock` - Mocked `IGroupInvitationRepository`
+- `GroupRepositoryMock` - Mocked `IGroupRepository`
 - `AuthService` - Instance under test with mocked dependencies
 
 All test classes inherit from this base class.
 
 ## Test Coverage
 
-| File                              | Tests | Scenarios Covered                                                |
-| --------------------------------- | ----- | ---------------------------------------------------------------- |
-| `RegisterAsyncTests.cs`           | 3     | Valid registration, validation errors, email sending             |
-| `LoginAsyncTests.cs`              | 4     | Valid login, invalid email, unconfirmed email, wrong password    |
-| `ConfirmEmailAsyncTests.cs`       | 3     | Valid token, nonexistent email, invalid token                    |
-| `ResendConfirmationAsyncTests.cs` | 3     | Unconfirmed user, already confirmed, nonexistent email           |
-| `ForgotPasswordAsyncTests.cs`     | 2     | Existing user, nonexistent email (enumeration prevention)        |
-| `ResetPasswordAsyncTests.cs`      | 4     | Valid reset, nonexistent email, invalid token, weak password     |
-| `RefreshTokenAsyncTests.cs`       | 4     | Valid refresh, old token revocation, invalid token, deleted user |
-| `LogoutAsyncTests.cs`             | 2     | Valid logout, nonexistent token                                  |
+| File                              | Tests | Scenarios Covered                                                               |
+| --------------------------------- | ----- | ------------------------------------------------------------------------------- |
+| `RegisterAsyncTests.cs`           | 9     | Valid registration, validation errors, email sending, invite-based registration |
+| `LoginAsyncTests.cs`              | 4     | Valid login, invalid email, unconfirmed email, wrong password                   |
+| `ConfirmEmailAsyncTests.cs`       | 3     | Valid token, nonexistent email, invalid token                                   |
+| `ResendConfirmationAsyncTests.cs` | 3     | Unconfirmed user, already confirmed, nonexistent email                          |
+| `ForgotPasswordAsyncTests.cs`     | 2     | Existing user, nonexistent email (enumeration prevention)                       |
+| `ResetPasswordAsyncTests.cs`      | 4     | Valid reset, nonexistent email, invalid token, weak password                    |
+| `RefreshTokenAsyncTests.cs`       | 4     | Valid refresh, old token revocation, invalid token, deleted user                |
+| `LogoutAsyncTests.cs`             | 2     | Valid logout, nonexistent token                                                 |
 
-**Total: 25 tests**
+**Total: 31 tests**
+
+## Invite-Based Registration Tests
+
+The `RegisterAsyncTests.cs` file includes tests for the invite-based registration flow:
+
+| Test                                                   | Description                                           |
+| ------------------------------------------------------ | ----------------------------------------------------- |
+| `WithValidInviteToken_CreatesUserAndAddsToGroup`       | Valid token creates user, adds to group, returns auth |
+| `WithValidInviteToken_ConfirmsEmailDirectly`           | Email is auto-confirmed, no confirmation email sent   |
+| `WithValidInviteToken_MarksInvitationAsAccepted`       | Invitation status updated to Accepted                 |
+| `WithInvalidInviteToken_ThrowsValidationException`     | Invalid token rejected before user creation           |
+| `WithExpiredInviteToken_ThrowsValidationException`     | Expired token rejected                                |
+| `WithAlreadyUsedInviteToken_ThrowsValidationException` | Already accepted token rejected                       |
+| `WithEmailMismatch_ThrowsValidationException`          | Registration email must match invitation email        |
 
 ## Running Tests
 

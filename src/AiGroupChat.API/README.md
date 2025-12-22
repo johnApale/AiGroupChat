@@ -293,7 +293,7 @@ open http://localhost:5126/scalar/v1
 
 ### Register
 
-**Request:**
+**Request (Regular):**
 
 ```http
 POST /api/auth/register
@@ -307,11 +307,50 @@ Content-Type: application/json
 }
 ```
 
-**Response (201):**
+**Response (201) - Regular Registration:**
 
 ```json
 {
-  "message": "Registration successful. Please check your email to confirm your account."
+  "requiresEmailConfirmation": true,
+  "message": "Registration successful. Please check your email to confirm your account.",
+  "auth": null,
+  "groupId": null
+}
+```
+
+**Request (Invite-Based):**
+
+```http
+POST /api/auth/register
+Content-Type: application/json
+
+{
+  "email": "invited@example.com",
+  "userName": "inviteduser",
+  "displayName": "Invited User",
+  "password": "SecurePass123!",
+  "inviteToken": "abc123-invite-token"
+}
+```
+
+**Response (201) - Invite-Based Registration:**
+
+```json
+{
+  "requiresEmailConfirmation": false,
+  "message": "Registration successful. You have been added to the group.",
+  "auth": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIs...",
+    "refreshToken": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "expiresAt": "2025-01-15T10:45:00Z",
+    "user": {
+      "id": "user-uuid",
+      "email": "invited@example.com",
+      "userName": "inviteduser",
+      "displayName": "Invited User"
+    }
+  },
+  "groupId": "660e8400-e29b-41d4-a716-446655440001"
 }
 ```
 

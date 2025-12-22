@@ -23,7 +23,12 @@ Endpoints for user registration, login, and session management.
 
 ## POST /register
 
-Create a new user account. Sends a confirmation email.
+Create a new user account.
+
+**Two registration modes:**
+
+1. **Regular registration** (no `inviteToken`): Sends a confirmation email. User must confirm before logging in.
+2. **Invite-based registration** (with `inviteToken`): Email is auto-confirmed, user is added to the group, and auth tokens are returned immediately.
 
 ### Request
 
@@ -32,16 +37,18 @@ Create a new user account. Sends a confirmation email.
   "email": "john.doe@example.com",
   "userName": "johndoe",
   "displayName": "John Doe",
-  "password": "SecurePass123!"
+  "password": "SecurePass123!",
+  "inviteToken": "abc123-invite-token"
 }
 ```
 
-| Field       | Type   | Required | Description             |
-| ----------- | ------ | -------- | ----------------------- |
-| email       | string | Yes      | Valid email address     |
-| userName    | string | Yes      | 3-50 characters, unique |
-| displayName | string | Yes      | Up to 100 characters    |
-| password    | string | Yes      | See requirements below  |
+| Field       | Type   | Required | Description                                       |
+| ----------- | ------ | -------- | ------------------------------------------------- |
+| email       | string | Yes      | Valid email address                               |
+| userName    | string | Yes      | 3-50 characters, unique                           |
+| displayName | string | Yes      | Up to 100 characters                              |
+| password    | string | Yes      | See requirements below                            |
+| inviteToken | string | No       | Invitation token (if registering via invite link) |
 
 ### Password Requirements
 
@@ -53,24 +60,59 @@ Create a new user account. Sends a confirmation email.
 
 ### Response
 
-**201 Created**
+**201 Created - Regular Registration**
 
 ```json
 {
-  "message": "Registration successful. Please check your email to confirm your account."
+  "requiresEmailConfirmation": true,
+  "message": "Registration successful. Please check your email to confirm your account.",
+  "auth": null,
+  "groupId": null
 }
 ```
 
+**201 Created - Invite-Based Registration**
+
+```json
+{
+  "requiresEmailConfirmation": false,
+  "message": "Registration successful. You have been added to the group.",
+  "auth": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "refreshToken": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "expiresAt": "2025-01-15T10:45:00Z",
+    "user": {
+      "id": "550e8400-e29b-41d4-a716-446655440000",
+      "email": "john.doe@example.com",
+      "userName": "johndoe",
+      "displayName": "John Doe"
+    }
+  },
+  "groupId": "660e8400-e29b-41d4-a716-446655440001"
+}
+```
+
+| Field                     | Type    | Description                                        |
+| ------------------------- | ------- | -------------------------------------------------- |
+| requiresEmailConfirmation | boolean | `true` for regular, `false` for invite-based       |
+| message                   | string  | Human-readable status message                      |
+| auth                      | object  | Auth tokens (only for invite-based registration)   |
+| groupId                   | string  | Group ID user was added to (only for invite-based) |
+
 ### Errors
 
-| Status | Error           | Description                        |
-| ------ | --------------- | ---------------------------------- |
-| 400    | ValidationError | Invalid email format               |
-| 400    | ValidationError | Password doesn't meet requirements |
-| 400    | ValidationError | Username already taken             |
-| 400    | ValidationError | Email already registered           |
+| Status | Error           | Description                         |
+| ------ | --------------- | ----------------------------------- |
+| 400    | ValidationError | Invalid email format                |
+| 400    | ValidationError | Password doesn't meet requirements  |
+| 400    | ValidationError | Username already taken              |
+| 400    | ValidationError | Email already registered            |
+| 400    | ValidationError | Invalid invitation token            |
+| 400    | ValidationError | Invitation has expired              |
+| 400    | ValidationError | Invitation is no longer valid       |
+| 400    | ValidationError | Email does not match the invitation |
 
-### Example
+### Example - Regular Registration
 
 ```typescript
 const response = await fetch("/api/auth/register", {
@@ -85,8 +127,39 @@ const response = await fetch("/api/auth/register", {
 });
 
 if (response.status === 201) {
-  // Show "check your email" message
-  showMessage("Please check your email to confirm your account.");
+  const result = await response.json();
+  if (result.requiresEmailConfirmation) {
+    // Show "check your email" message
+    showMessage("Please check your email to confirm your account.");
+  }
+}
+```
+
+### Example - Invite-Based Registration
+
+```typescript
+// User clicked invite link, frontend extracted token and showed registration form
+const inviteToken = getInviteTokenFromUrl();
+
+const response = await fetch("/api/auth/register", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    email: "invited@example.com", // Must match the invitation email
+    userName: "inviteduser",
+    displayName: "Invited User",
+    password: "SecurePass123!",
+    inviteToken: inviteToken,
+  }),
+});
+
+if (response.status === 201) {
+  const result = await response.json();
+  if (!result.requiresEmailConfirmation) {
+    // User is already logged in and added to group
+    setTokens(result.auth.accessToken, result.auth.refreshToken);
+    redirect(`/groups/${result.groupId}`);
+  }
 }
 ```
 

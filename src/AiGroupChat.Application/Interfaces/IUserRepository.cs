@@ -40,6 +40,11 @@ public interface IUserRepository
     Task<bool> ConfirmEmailAsync(User user, string token, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Confirm user's email directly without token (for invite-based registration)
+    /// </summary>
+    Task ConfirmEmailDirectAsync(User user, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Generate password reset token
     /// </summary>
     Task<string> GeneratePasswordResetTokenAsync(User user, CancellationToken cancellationToken = default);

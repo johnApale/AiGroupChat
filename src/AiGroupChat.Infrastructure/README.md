@@ -68,14 +68,30 @@ AiGroupChat.Infrastructure/
 
 ## Repositories
 
-| Repository                     | Interface                       | Purpose                                                                |
-| ------------------------------ | ------------------------------- | ---------------------------------------------------------------------- |
-| `IdentityUserRepository`       | `IUserRepository`               | Wraps ASP.NET Identity UserManager                                     |
-| `GroupRepository`              | `IGroupRepository`              | Group CRUD, membership checks, member management, includes AI provider |
-| `GroupMemberRepository`        | `IGroupMemberRepository`        | Group member queries and ID retrieval                                  |
-| `AiProviderRepository`         | `IAiProviderRepository`         | AI provider queries (enabled providers, by ID)                         |
-| `MessageRepository`            | `IMessageRepository`            | Message CRUD, paginated queries, AI context retrieval                  |
-| `AiResponseMetadataRepository` | `IAiResponseMetadataRepository` | AI response metadata storage (tokens, latency, cost)                   |
+| Repository                     | Interface                       | Purpose                                                                 |
+| ------------------------------ | ------------------------------- | ----------------------------------------------------------------------- |
+| `IdentityUserRepository`       | `IUserRepository`               | Wraps ASP.NET Identity UserManager (includes direct email confirmation) |
+| `GroupRepository`              | `IGroupRepository`              | Group CRUD, membership checks, member management, includes AI provider  |
+| `GroupMemberRepository`        | `IGroupMemberRepository`        | Group member queries and ID retrieval                                   |
+| `GroupInvitationRepository`    | `IGroupInvitationRepository`    | Invitation CRUD, token lookup, pending invitations                      |
+| `AiProviderRepository`         | `IAiProviderRepository`         | AI provider queries (enabled providers, by ID)                          |
+| `MessageRepository`            | `IMessageRepository`            | Message CRUD, paginated queries, AI context retrieval                   |
+| `AiResponseMetadataRepository` | `IAiResponseMetadataRepository` | AI response metadata storage (tokens, latency, cost)                    |
+
+### IdentityUserRepository Methods
+
+| Method                                | Description                                                          |
+| ------------------------------------- | -------------------------------------------------------------------- |
+| `FindByEmailAsync`                    | Find user by email address                                           |
+| `FindByIdAsync`                       | Find user by ID                                                      |
+| `CreateAsync`                         | Create new user with password                                        |
+| `CheckPasswordAsync`                  | Validate user password                                               |
+| `IsEmailConfirmedAsync`               | Check if email is confirmed                                          |
+| `GenerateEmailConfirmationTokenAsync` | Generate email confirmation token                                    |
+| `ConfirmEmailAsync`                   | Confirm email with token                                             |
+| `ConfirmEmailDirectAsync`             | Confirm email directly without token (for invite-based registration) |
+| `GeneratePasswordResetTokenAsync`     | Generate password reset token                                        |
+| `ResetPasswordAsync`                  | Reset password with token                                            |
 
 ## Services
 

@@ -5,9 +5,10 @@ namespace AiGroupChat.Application.Interfaces;
 public interface IAuthService
 {
     /// <summary>
-    /// Register a new user and send confirmation email
+    /// Register a new user and send confirmation email.
+    /// If inviteToken is provided, email is auto-confirmed and user is added to group.
     /// </summary>
-    Task<MessageResponse> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default);
+    Task<RegisterResponse> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Authenticate user and return tokens

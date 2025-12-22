@@ -24,8 +24,20 @@ public class AuthController : ControllerBase
     /// Register a new user account
     /// </summary>
     /// <remarks>
-    /// Creates a new user account and sends a confirmation email.
-    /// The user must confirm their email before they can log in.
+    /// Creates a new user account.
+    /// 
+    /// **Two registration modes:**
+    /// 
+    /// 1. **Regular registration** (no inviteToken):
+    ///    - Sends a confirmation email
+    ///    - User must confirm email before logging in
+    ///    - Returns `requiresEmailConfirmation: true`
+    /// 
+    /// 2. **Invite-based registration** (with inviteToken):
+    ///    - Email is auto-confirmed (they proved ownership by clicking invite link)
+    ///    - User is automatically added to the group
+    ///    - Returns auth tokens and groupId immediately
+    ///    - Email must match the invitation email
     /// 
     /// **Password requirements:**
     /// - At least 6 characters
@@ -36,15 +48,15 @@ public class AuthController : ControllerBase
     /// </remarks>
     /// <param name="request">Registration details</param>
     /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>Success message</returns>
-    /// <response code="201">Account created successfully. Check email for confirmation link.</response>
-    /// <response code="400">Validation error (invalid email, weak password, etc.)</response>
+    /// <returns>Registration result</returns>
+    /// <response code="201">Account created successfully</response>
+    /// <response code="400">Validation error (invalid email, weak password, invalid invite token, etc.)</response>
     [HttpPost("register")]
-    [ProducesResponseType(typeof(MessageResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(RegisterResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Register([FromBody] RegisterRequest request, CancellationToken cancellationToken)
     {
-        MessageResponse result = await _authService.RegisterAsync(request, cancellationToken);
+        RegisterResponse result = await _authService.RegisterAsync(request, cancellationToken);
         return StatusCode(201, result);
     }
 

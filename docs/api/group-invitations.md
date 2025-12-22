@@ -332,19 +332,59 @@ async function handleInvitationAccept(token: string): Promise<void> {
   const result = await response.json();
 
   if (result.requiresRegistration) {
-    // Redirect to signup with email pre-filled
-    // Store token for use after registration
-    sessionStorage.setItem("inviteToken", token);
+    // Redirect to signup with email pre-filled and invite token
     redirect(
       `/signup?email=${encodeURIComponent(
         result.email
-      )}&group=${encodeURIComponent(result.groupName)}`
+      )}&group=${encodeURIComponent(
+        result.groupName
+      )}&inviteToken=${encodeURIComponent(token)}`
     );
   } else {
     // User is authenticated and added to group
     setAuthTokens(result.auth);
     redirect(`/groups/${result.groupId}`);
     showToast("You've joined the group!");
+  }
+}
+```
+
+### Registration with Invite Token
+
+When a new user needs to register, pass the `inviteToken` to the registration endpoint. This will:
+
+- Auto-confirm their email (they proved ownership by clicking the invite link)
+- Add them to the group immediately
+- Return auth tokens so they're logged in
+
+See [POST /api/auth/register](authentication.md#post-register) for details.
+
+```typescript
+async function handleInviteRegistration(
+  email: string,
+  inviteToken: string,
+  formData: RegistrationForm
+): Promise<void> {
+  const response = await fetch("/api/auth/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      email: email, // Must match the invitation email
+      userName: formData.userName,
+      displayName: formData.displayName,
+      password: formData.password,
+      inviteToken: inviteToken,
+    }),
+  });
+
+  if (response.status === 201) {
+    const result = await response.json();
+    if (!result.requiresEmailConfirmation) {
+      // User is logged in and added to group
+      setAuthTokens(result.auth);
+      redirect(`/groups/${result.groupId}`);
+      showToast("Welcome! You've joined the group.");
+    }
   }
 }
 ```

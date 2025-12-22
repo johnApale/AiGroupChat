@@ -21,6 +21,7 @@ AiGroupChat.Application/
 ├── DTOs/
 │   ├── Auth/
 │   │   ├── RegisterRequest.cs
+│   │   ├── RegisterResponse.cs
 │   │   ├── LoginRequest.cs
 │   │   ├── ConfirmEmailRequest.cs
 │   │   ├── ResendConfirmationRequest.cs
@@ -112,28 +113,29 @@ DTOs (Data Transfer Objects) define the shape of data for API requests and respo
 
 ### REST API DTOs
 
-| DTO                         | Purpose                                      |
-| --------------------------- | -------------------------------------------- |
-| `RegisterRequest`           | User registration input                      |
-| `LoginRequest`              | User login input                             |
-| `ConfirmEmailRequest`       | Email confirmation input                     |
-| `ResendConfirmationRequest` | Resend confirmation email input              |
-| `ForgotPasswordRequest`     | Password reset request input                 |
-| `ResetPasswordRequest`      | Password reset input                         |
-| `RefreshTokenRequest`       | Token refresh input                          |
-| `LogoutRequest`             | Logout input                                 |
-| `AuthResponse`              | Authentication response with tokens and user |
-| `MessageResponse`           | Simple message response                      |
-| `UserResponse`              | User profile data                            |
-| `CreateGroupRequest`        | Group creation input                         |
-| `UpdateGroupRequest`        | Group update input                           |
-| `UpdateAiSettingsRequest`   | AI settings update input (partial)           |
-| `GroupResponse`             | Group details with members and AI provider   |
-| `GroupMemberResponse`       | Group member profile data                    |
-| `AiProviderResponse`        | AI provider details (id, name, model, etc.)  |
-| `SendMessageRequest`        | Message creation input                       |
-| `MessageResponse`           | Message details with sender info             |
-| `PaginatedResponse<T>`      | Generic paginated response wrapper           |
+| DTO                         | Purpose                                                       |
+| --------------------------- | ------------------------------------------------------------- |
+| `RegisterRequest`           | User registration input (with optional inviteToken)           |
+| `RegisterResponse`          | Registration response (handles both regular and invite-based) |
+| `LoginRequest`              | User login input                                              |
+| `ConfirmEmailRequest`       | Email confirmation input                                      |
+| `ResendConfirmationRequest` | Resend confirmation email input                               |
+| `ForgotPasswordRequest`     | Password reset request input                                  |
+| `ResetPasswordRequest`      | Password reset input                                          |
+| `RefreshTokenRequest`       | Token refresh input                                           |
+| `LogoutRequest`             | Logout input                                                  |
+| `AuthResponse`              | Authentication response with tokens and user                  |
+| `MessageResponse`           | Simple message response                                       |
+| `UserResponse`              | User profile data                                             |
+| `CreateGroupRequest`        | Group creation input                                          |
+| `UpdateGroupRequest`        | Group update input                                            |
+| `UpdateAiSettingsRequest`   | AI settings update input (partial)                            |
+| `GroupResponse`             | Group details with members and AI provider                    |
+| `GroupMemberResponse`       | Group member profile data                                     |
+| `AiProviderResponse`        | AI provider details (id, name, model, etc.)                   |
+| `SendMessageRequest`        | Message creation input                                        |
+| `MessageResponse`           | Message details with sender info                              |
+| `PaginatedResponse<T>`      | Generic paginated response wrapper                            |
 
 ### AI Service DTOs
 
